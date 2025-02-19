@@ -80,7 +80,7 @@
 
       <v-select
         clearable
-        v-else-if="v.type === 'enum'"
+        v-else-if="v.type === 'enum' || v.type === 'multi_enum'"
         :label="v.title + (v.required ? ' *' : '')"
         :hint="v.description"
         v-model="editedEnvironment[v.name]"
@@ -93,7 +93,19 @@
         item-value="value"
         outlined
         dense
-      />
+        :multiple="v.type === 'multi_enum'"
+        :chips="v.type === 'multi_enum'"
+      >
+      <template v-if="v.type === 'multi_enum'" v-slot:selection="{ item, index }">
+          <v-chip
+            small
+            close
+            @click:close="deleteItem(v.name, index)"
+          >
+            {{ item.name }}
+          </v-chip>
+        </template>
+    </v-select>
 
       <v-text-field
         v-else
@@ -287,6 +299,10 @@ export default {
 
     setArgs(args) {
       this.item.arguments = JSON.stringify(args || []);
+    },
+
+    deleteItem(name, index) {
+      this.editedEnvironment[name].splice(index, 1);
     },
 
     getTaskMessage(task) {

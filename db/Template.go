@@ -59,9 +59,10 @@ func (t TemplateApp) IsTerraform() bool {
 type SurveyVarType string
 
 const (
-	SurveyVarStr  TemplateType = ""
-	SurveyVarInt  TemplateType = "int"
-	SurveyVarEnum TemplateType = "enum"
+	SurveyVarStr       TemplateType = ""
+	SurveyVarInt       TemplateType = "int"
+	SurveyVarEnum      TemplateType = "enum"
+	SurveyVarMultiEnum TemplateType = "multi_enum"
 )
 
 type AnsibleTemplateParams struct {
