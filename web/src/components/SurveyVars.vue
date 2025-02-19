@@ -48,7 +48,7 @@
             ></v-select>
 
             <v-data-table
-              v-if="editedVar.type === 'enum'"
+              v-if="editedVar.type === 'enum' || editedVar.type === 'multi_enum'"
               :items="editedValues"
               :items-per-page="-1"
               class="elevation-1 FieldTable"
@@ -94,15 +94,9 @@
               <v-btn
                 color="primary"
                 class="d-block"
-                v-if="editedVar.type === 'enum'"
+                v-if="editedVar.type === 'enum' || editedVar.type === 'multi_enum'"
                 @click="addEditedVarValue()"
               >Add Value</v-btn>
-
-              <v-checkbox
-                v-if="editedVar.type === 'enum'"
-                :label="$t('allowMultipleValues')"
-                v-model="editedVar.multiple"
-              />
             </div>
 
             <v-select
@@ -213,6 +207,9 @@ export default {
       }, {
         id: 'enum',
         name: 'Enum',
+      }, {
+        id: 'multi_enum',
+        name: 'Multi Enum',
       }],
       formError: null,
     };
@@ -255,10 +252,7 @@ export default {
         return;
       }
 
-      if (this.editedVar.type === 'enum') {
-        if (this.editedVar.multiple) {
-          this.editedVar.type = 'multi_enum';
-        }
+      if (this.editedVar.type === 'enum' || this.editedVar.type === 'multi_enum') {
         if (this.editedValues.length === 0) {
           this.formError = 'Enumeration must have values.';
           return;
