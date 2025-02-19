@@ -93,9 +93,16 @@
             <div class="text-right mt-2">
               <v-btn
                 color="primary"
+                class="d-block"
                 v-if="editedVar.type === 'enum'"
                 @click="addEditedVarValue()"
               >Add Value</v-btn>
+
+              <v-checkbox
+                v-if="editedVar.type === 'enum'"
+                :label="$t('allowMultipleValues')"
+                v-model="editedVar.multiple"
+              />
             </div>
 
             <v-select
@@ -249,6 +256,9 @@ export default {
       }
 
       if (this.editedVar.type === 'enum') {
+        if (this.editedVar.multiple) {
+          this.editedVar.type = 'multi_enum';
+        }
         if (this.editedValues.length === 0) {
           this.formError = 'Enumeration must have values.';
           return;
