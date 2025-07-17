@@ -44,6 +44,11 @@ type BoltDb struct {
 	terraformAlias   publicAlias
 }
 
+func (d *BoltDb) InsertTaskOutputBatch(output []db.TaskOutput) error {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (d *BoltDb) GetDialect() string {
 	return util.DbDriverBolt
 }

@@ -229,6 +229,28 @@ func (d *SqlDb) CreateTaskOutput(output db.TaskOutput) (db.TaskOutput, error) {
 	return output, err
 }
 
+func (d *SqlDb) InsertTaskOutputBatch(output []db.TaskOutput) error {
+
+	if len(output) == 0 {
+		return nil
+	}
+
+	q := squirrel.Insert("task__output").
+		Columns("task_id", "output", "time", "stage_id")
+
+	for _, item := range output {
+		q = q.Values(item.TaskID, item.Output, item.Time.UTC(), item.StageID)
+	}
+
+	query, args, err := q.ToSql()
+	if err != nil {
+		return err
+	}
+
+	_, err = d.exec(query, args...)
+	return err
+}
+
 func (d *SqlDb) getTasks(projectID int, templateID *int, taskIDs []int, params db.RetrieveQueryParams, tasks *[]db.TaskWithTpl) (err error) {
 	fields := "task.*"
 	fields += ", tpl.playbook as tpl_playbook" +
