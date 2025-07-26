@@ -38,7 +38,7 @@ const (
 )
 
 const (
-	TaskOutputBatchSize        = 1000
+	TaskOutputBatchSize        = 500
 	TaskOutputInsertIntervalMs = 500
 )
 
