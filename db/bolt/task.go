@@ -121,6 +121,22 @@ func (d *BoltDb) CreateTaskOutput(output db.TaskOutput) (db.TaskOutput, error) {
 	return newOutput.(db.TaskOutput), nil
 }
 
+func (d *BoltDb) InsertTaskOutputBatch(output []db.TaskOutput) error {
+	if len(output) == 0 {
+		return nil
+	}
+
+	return d.db.Update(func(tx *bbolt.Tx) error {
+		for _, out := range output {
+			_, err := d.createObjectTx(tx, out.TaskID, db.TaskOutputProps, out)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	})
+}
+
 func (d *BoltDb) getTasks(projectID int, templateID *int, params db.RetrieveQueryParams) (tasksWithTpl []db.TaskWithTpl, err error) {
 	var tasks []db.Task
 
