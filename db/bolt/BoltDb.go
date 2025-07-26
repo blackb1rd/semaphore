@@ -45,8 +45,13 @@ type BoltDb struct {
 }
 
 func (d *BoltDb) InsertTaskOutputBatch(output []db.TaskOutput) error {
-	//TODO implement me
-	panic("implement me")
+	for _, out := range output {
+		_, err := d.CreateTaskOutput(out)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (d *BoltDb) GetDialect() string {
