@@ -208,6 +208,11 @@ func (p *TaskPool) handleQueue() {
 
 func (p *TaskPool) handleLogs() {
 	logTicker := time.NewTicker(TaskOutputInsertIntervalMs * time.Millisecond)
+
+	defer func() {
+		logTicker.Stop()
+	}()
+
 	logs := make([]logRecord, 0)
 
 	for {
@@ -228,7 +233,7 @@ func (p *TaskPool) handleLogs() {
 func (p *TaskPool) flushLogs(logs *[]logRecord) {
 	if len(*logs) > 0 {
 		p.writeLogs(*logs)
-		*logs = make([]logRecord, 0)
+		*logs = (*logs)[:0]
 	}
 }
 
@@ -242,7 +247,6 @@ func (p *TaskPool) writeLogs(logs []logRecord) {
 			Output: record.output,
 			Time:   record.time,
 		}
-		taskOutput = append(taskOutput, newOutput)
 
 		currentOutput := record.task.currentOutput
 		record.task.currentOutput = &newOutput
@@ -272,9 +276,10 @@ func (p *TaskPool) writeLogs(logs []logRecord) {
 			}
 
 			if record.task.currentStage != nil {
-				newOutput.StageID = record.task.currentStage.ID
+				newOutput.StageID = &record.task.currentStage.ID
 			}
 		})
+		taskOutput = append(taskOutput, newOutput)
 	}
 
 	db.StoreSession(p.store, "logger", func() {

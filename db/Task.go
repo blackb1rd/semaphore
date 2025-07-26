@@ -204,7 +204,7 @@ type TaskOutput struct {
 	TaskID  int       `db:"task_id" json:"task_id"`
 	Time    time.Time `db:"time" json:"time"`
 	Output  string    `db:"output" json:"output"`
-	StageID int       `db:"stage_id" json:"stage_id"`
+	StageID *int      `db:"stage_id" json:"stage_id"`
 }
 
 type TaskStageType string
