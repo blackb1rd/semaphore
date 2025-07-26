@@ -144,9 +144,7 @@ func (p *TaskPool) GetTaskByAlias(alias string) (task *TaskRunner) {
 func (p *TaskPool) Run() {
 	ticker := time.NewTicker(5 * time.Second)
 
-	defer func() {
-		ticker.Stop()
-	}()
+	defer ticker.Stop()
 
 	go p.handleQueue()
 	go p.handleLogs()
@@ -209,9 +207,7 @@ func (p *TaskPool) handleQueue() {
 func (p *TaskPool) handleLogs() {
 	logTicker := time.NewTicker(TaskOutputInsertIntervalMs * time.Millisecond)
 
-	defer func() {
-		logTicker.Stop()
-	}()
+	defer logTicker.Stop()
 
 	logs := make([]logRecord, 0)
 
