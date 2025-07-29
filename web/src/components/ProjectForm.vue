@@ -13,7 +13,7 @@
 
     <v-text-field
       v-model="item.name"
-      :label="$t('projectName')"
+      :label="$t(projectNameTitle)"
       :rules="[v => !!v || $t('project_name_required')]"
       required
       :disabled="formSaving"
@@ -53,10 +53,6 @@
       data-testid="newProject-alert"
     ></v-checkbox>
 
-    <v-btn v-if="itemId !== 'new'" color="blue-grey">
-      Test notifications
-    </v-btn>
-
     <v-switch
       v-if="itemId === 'new'"
       v-model="item.demo"
@@ -73,6 +69,10 @@ import ItemFormBase from '@/components/ItemFormBase';
 export default {
   mixins: [ItemFormBase],
   props: {
+    projectNameTitle: {
+      type: String,
+      default: 'projectName',
+    },
   },
   methods: {
     getItemsUrl() {

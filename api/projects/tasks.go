@@ -408,6 +408,6 @@ func GetTaskStats(w http.ResponseWriter, r *http.Request) {
 	helpers.WriteJSON(w, http.StatusOK, stats)
 }
 
-func StopAllTasks(w http.ResponseWriter, r *http.Request) {
+func (c *TaskController) StopAllTasks(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }

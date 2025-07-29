@@ -423,7 +423,7 @@ func Route(
 	projectTmplManagement.HandleFunc("/{template_id}/tasks/last", projects.GetLastTasks).Methods("GET")
 	projectTmplManagement.HandleFunc("/{template_id}/schedules", projects.GetTemplateSchedules).Methods("GET")
 	projectTmplManagement.HandleFunc("/{template_id}/stats", projects.GetTaskStats).Methods("GET")
-	projectTmplManagement.HandleFunc("/{template_id}/stop_all_tasks", projects.StopAllTasks).Methods("POST")
+	projectTmplManagement.HandleFunc("/{template_id}/stop_all_tasks", taskController.StopAllTasks).Methods("POST")
 
 	projectTmplInvManagement := projectTmplManagement.PathPrefix("/{template_id}/inventory").Subrouter()
 	projectTmplInvManagement.Use(projects.InventoryMiddleware)

@@ -139,7 +139,6 @@ func (p *SchedulePool) init() {
 }
 
 func (p *SchedulePool) Refresh() {
-	defer p.locker.Unlock()
 
 	schedules, err := p.store.GetSchedules()
 
@@ -149,6 +148,8 @@ func (p *SchedulePool) Refresh() {
 	}
 
 	p.locker.Lock()
+	defer p.locker.Unlock()
+
 	p.clear()
 	for _, schedule := range schedules {
 		if schedule.RepositoryID == nil && !schedule.Active {

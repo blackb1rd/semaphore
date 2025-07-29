@@ -3,8 +3,7 @@ package bolt
 import "github.com/semaphoreui/semaphore/db"
 
 func (d *BoltDb) GetSecretStorages(projectID int) ([]db.SecretStorage, error) {
-	//TODO implement me
-	panic("implement me")
+	return []db.SecretStorage{}, nil
 }
 
 func (d *BoltDb) CreateSecretStorage(storage db.SecretStorage) (db.SecretStorage, error) {
