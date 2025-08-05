@@ -186,6 +186,9 @@ func GetTaskStages(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for i := range stages {
+		if stages[i].JSON == "" {
+			continue
+		}
 		var res any
 		err = json.Unmarshal([]byte(stages[i].JSON), &res)
 		if err != nil {

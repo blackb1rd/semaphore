@@ -158,9 +158,11 @@ func createSession(w http.ResponseWriter, r *http.Request, user db.User, oidc bo
 	switch {
 	case user.Totp != nil && util.Config.Auth.Totp.Enabled:
 		verificationMethod = db.SessionVerificationTotp
+
 	case util.Config.Auth.Email.Enabled && (!util.Config.Auth.Email.DisableForOidc || !oidc):
-		code := random.Number(6)
-		_, err = helpers.Store(r).AddEmailOtpVerification(user.ID, code)
+
+		err = newEmailOtp(user.ID, user.Email, helpers.Store(r))
+
 		if err != nil {
 			log.WithError(err).WithFields(log.Fields{
 				"user_id": user.ID,

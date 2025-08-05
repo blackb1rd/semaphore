@@ -1,6 +1,7 @@
 package tasks
 
 import (
+	"github.com/semaphoreui/semaphore/pkg/ssh"
 	"math/rand"
 	"os"
 	"path"
@@ -21,8 +22,8 @@ import (
 type KeyInstallerMock struct {
 }
 
-func (s *KeyInstallerMock) Install(key db.AccessKey, usage db.AccessKeyRole, logger task_logger.Logger) (installation db.AccessKeyInstallation, err error) {
-	return db.AccessKeyInstallation{}, nil
+func (s *KeyInstallerMock) Install(key db.AccessKey, usage db.AccessKeyRole, logger task_logger.Logger) (installation ssh.AccessKeyInstallation, err error) {
+	return ssh.AccessKeyInstallation{}, nil
 }
 
 type InventoryServiceMock struct {

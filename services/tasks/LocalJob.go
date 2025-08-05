@@ -3,6 +3,7 @@ package tasks
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/semaphoreui/semaphore/pkg/ssh"
 	"maps"
 	"os"
 	"strings"
@@ -30,9 +31,9 @@ type LocalJob struct {
 	killed  bool // killed means that API request to stop the job has been received
 	Process *os.Process
 
-	sshKeyInstallation     db.AccessKeyInstallation
-	becomeKeyInstallation  db.AccessKeyInstallation
-	vaultFileInstallations map[string]db.AccessKeyInstallation
+	sshKeyInstallation     ssh.AccessKeyInstallation
+	becomeKeyInstallation  ssh.AccessKeyInstallation
+	vaultFileInstallations map[string]ssh.AccessKeyInstallation
 
 	KeyInstaller db_lib.AccessKeyInstaller
 }
@@ -750,7 +751,7 @@ func (t *LocalJob) checkoutRepository() error {
 }
 
 func (t *LocalJob) installVaultKeyFiles() (err error) {
-	t.vaultFileInstallations = make(map[string]db.AccessKeyInstallation)
+	t.vaultFileInstallations = make(map[string]ssh.AccessKeyInstallation)
 
 	if len(t.Template.Vaults) == 0 {
 		return nil
@@ -764,7 +765,7 @@ func (t *LocalJob) installVaultKeyFiles() (err error) {
 			name = "default"
 		}
 
-		var install db.AccessKeyInstallation
+		var install ssh.AccessKeyInstallation
 		if vault.Type == db.TemplateVaultPassword {
 			install, err = t.KeyInstaller.Install(*vault.Vault, db.AccessKeyRoleAnsiblePasswordVault, t.Logger)
 			if err != nil {

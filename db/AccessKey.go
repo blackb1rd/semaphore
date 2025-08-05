@@ -2,11 +2,10 @@ package db
 
 import (
 	"fmt"
-	"github.com/semaphoreui/semaphore/pkg/random"
-	"github.com/semaphoreui/semaphore/pkg/ssh"
-	"github.com/semaphoreui/semaphore/pkg/task_logger"
-	"github.com/semaphoreui/semaphore/util"
-	"path"
+	//"github.com/semaphoreui/semaphore/pkg/ssh"
+	//"github.com/semaphoreui/semaphore/pkg/random"
+	//"github.com/semaphoreui/semaphore/pkg/ssh"
+	//"path"
 )
 
 type AccessKeyType string
@@ -79,62 +78,6 @@ const (
 	AccessKeyRoleAnsiblePasswordVault
 	AccessKeyRoleGit
 )
-
-type AccessKeyInstallation struct {
-	SSHAgent *ssh.Agent
-	Login    string
-	Password string
-	Script   string
-}
-
-func (key *AccessKeyInstallation) GetGitEnv() (env []string) {
-	env = make([]string, 0)
-
-	env = append(env, fmt.Sprintln("GIT_TERMINAL_PROMPT=0"))
-	if key.SSHAgent != nil {
-		env = append(env, fmt.Sprintf("SSH_AUTH_SOCK=%s", key.SSHAgent.SocketFile))
-		sshCmd := "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-		if util.Config.SshConfigPath != "" {
-			sshCmd += " -F " + util.Config.SshConfigPath
-		}
-		env = append(env, fmt.Sprintf("GIT_SSH_COMMAND=%s", sshCmd))
-	}
-
-	return env
-}
-
-func (key *AccessKeyInstallation) Destroy() error {
-	if key.SSHAgent != nil {
-		return key.SSHAgent.Close()
-	}
-	return nil
-}
-
-func (key *AccessKey) startSSHAgent(logger task_logger.Logger) (ssh.Agent, error) {
-
-	socketFilename := fmt.Sprintf("ssh-agent-%d-%s.sock", key.ID, random.String(10))
-
-	var socketFile string
-
-	if key.ProjectID == nil {
-		socketFile = path.Join(util.Config.TmpPath, socketFilename)
-	} else {
-		socketFile = path.Join(util.Config.GetProjectTmpDir(*key.ProjectID), socketFilename)
-	}
-
-	sshAgent := ssh.Agent{
-		Logger: logger,
-		Keys: []ssh.AgentKey{
-			{
-				Key:        []byte(key.SshKey.PrivateKey),
-				Passphrase: []byte(key.SshKey.Passphrase),
-			},
-		},
-		SocketFile: socketFile,
-	}
-
-	return sshAgent, sshAgent.Listen()
-}
 
 func (key *AccessKey) Validate(validateSecretFields bool) error {
 	if key.Name == "" {

@@ -110,9 +110,14 @@
             </v-alert>
 
             <div v-if="screen === 'verification'">
-              <div class="text-center mb-4">
+
+              <div  v-if="verificationMethod === 'totp'" class="text-center mb-4">
                 Open the two-step verification app on your mobile device to
                 get your verification code.
+              </div>
+
+              <div v-else-if="verificationMethod === 'email'" class="text-center mb-4">
+                Check your email for the verification code we just sent you.
               </div>
 
               <v-otp-input
@@ -126,10 +131,19 @@
               <div class="text-center">
                 <a @click="signOut()" class="mr-6">{{ $t('Return to login') }}</a>
                 <a
-                  v-if="authMethods.totp && authMethods.totp.allow_recovery"
+                  v-if="verificationMethod === 'totp'
+                    && authMethods.totp
+                    && authMethods.totp.allow_recovery"
                   @click="screen = 'recovery'"
                 >
                   {{ $t('Use recovery code') }}
+                </a>
+
+                <a
+                  v-if="verificationMethod === 'email'"
+                  @click="resendEmailVerification()"
+                >
+                  {{ $t('Resend code to email') }}
                 </a>
               </div>
             </div>
@@ -265,6 +279,11 @@
   height: 100vh;
   background: #80808024;
 }
+.auth {
+  background-image: url("../assets/background.svg");
+  background-color: #005057;
+  background-size: cover;
+}
 </style>
 <script>
 import axios from 'axios';
@@ -316,6 +335,10 @@ export default {
   },
 
   methods: {
+    async resendEmailVerification() {
+      // TODO: resend email verification code
+    },
+
     async loadLoginData() {
       await axios({
         method: 'get',
@@ -393,6 +416,11 @@ export default {
                 status: 'unverified',
                 verificationMethod: 'totp',
               };
+            case 'EMAIL_OTP_REQUIRED':
+              return {
+                status: 'unverified',
+                verificationMethod: 'email',
+              };
             default:
               return { status: 'unauthenticated' };
           }
@@ -422,11 +450,12 @@ export default {
         });
         document.location = document.baseURI + window.location.search;
       } catch (err) {
-        if (err.response.status === 401) {
-          this.signInError = this.$t('Incorrect verification code.');
-        } else {
-          this.signInError = getErrorMessage(err);
-        }
+        this.signInError = getErrorMessage(err);
+        // if (err.response.status === 401) {
+        //   this.signInError = this.$t('Incorrect verification code.');
+        // } else {
+        //   this.signInError = getErrorMessage(err);
+        // }
       } finally {
         this.signInProcess = false;
       }

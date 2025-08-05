@@ -7,10 +7,14 @@ web/public/html/**/*.*
 web/public/fonts/*.*
 web/.nyc_output
 api/public/**/*
+/server.json
 /config.json
 /config.runner.json
 /config.runner.token
 /config.runner.key
+/runner.json
+/runner.token
+/runner.key
 /.dredd/config.json
 /database.boltdb
 /database.sqlite

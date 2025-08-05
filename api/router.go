@@ -144,6 +144,8 @@ func Route(
 
 	publicAPIRouter.HandleFunc("/auth/login", login).Methods("GET", "POST")
 	publicAPIRouter.HandleFunc("/auth/verify/email", startEmailVerification).Methods("POST")
+	publicAPIRouter.HandleFunc("/auth/login/email", loginEmail).Methods("GET", "POST")
+	publicAPIRouter.HandleFunc("/auth/login/email/resend", resendEmailOtp).Methods("GET", "POST")
 	publicAPIRouter.HandleFunc("/auth/verify", verifySession).Methods("POST")
 	publicAPIRouter.HandleFunc("/auth/recovery", recoverySession).Methods("POST")
 

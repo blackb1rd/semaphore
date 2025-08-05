@@ -10,6 +10,7 @@ import (
 	"github.com/semaphoreui/semaphore/db"
 	"github.com/semaphoreui/semaphore/util"
 	"github.com/semaphoreui/semaphore/util/mailer"
+	log "github.com/sirupsen/logrus"
 )
 
 //go:embed templates/*.tmpl
@@ -80,6 +81,13 @@ func sendEmailVerificationCode(code string, email string) error {
 		return err
 	}
 
+	content := body.String()
+
+	log.WithFields(log.Fields{
+		"email":   email,
+		"context": "send_email_verification_code",
+	}).Info("send email otp code")
+
 	err = mailer.Send(
 		util.Config.EmailSecure,
 		util.Config.EmailTls,
@@ -89,9 +97,18 @@ func sendEmailVerificationCode(code string, email string) error {
 		util.Config.EmailPassword,
 		util.Config.EmailSender,
 		email,
-		"Email Verification Code",
-		body.String(),
+		"Email verification code",
+		content,
 	)
+
+	if err != nil {
+
+		log.WithError(err).WithFields(log.Fields{
+			"email":   email,
+			"context": "send_email_verification_code",
+		}).Error("failed to send email verification code")
+
+	}
 
 	return err
 }

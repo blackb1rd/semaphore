@@ -2,6 +2,7 @@ package db_lib
 
 import (
 	"fmt"
+	"github.com/semaphoreui/semaphore/pkg/ssh"
 	"os/exec"
 	"strings"
 
@@ -16,7 +17,7 @@ type CmdGitClient struct {
 func (c CmdGitClient) makeCmd(
 	r GitRepository,
 	targetDir GitRepositoryDirType,
-	installation db.AccessKeyInstallation,
+	installation ssh.AccessKeyInstallation,
 	args ...string,
 ) *exec.Cmd {
 	cmd := exec.Command("git") //nolint: gas
