@@ -5,14 +5,34 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var runnerStartArgs struct {
+	register bool
+}
+
 func init() {
+	runnerRegisterCmd.PersistentFlags().BoolVar(&runnerStartArgs.register, "register", false, "Register new runner if not registered")
 	runnerCmd.AddCommand(runnerStartCmd)
 }
 
 func runRunner() {
-	util.ConfigInit(persistentFlags.configPath, persistentFlags.noConfig)
+
+	configFile := util.ConfigInit(persistentFlags.configPath, persistentFlags.noConfig)
 
 	taskPool := createRunnerJobPool()
+
+	if runnerStartArgs.register {
+
+		initRunnerRegistrationToken()
+
+		if util.Config.Runner.Token == "" {
+
+			err := taskPool.Register(configFile)
+
+			if err != nil {
+				panic(err)
+			}
+		}
+	}
 
 	taskPool.Run()
 }
