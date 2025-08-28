@@ -31,6 +31,8 @@ func runRunner() {
 			if err != nil {
 				panic(err)
 			}
+
+			_ = util.ConfigInit(persistentFlags.configPath, persistentFlags.noConfig)
 		}
 	}
 
