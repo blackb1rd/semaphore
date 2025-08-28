@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"time"
+
 	"github.com/semaphoreui/semaphore/util"
 	"github.com/spf13/cobra"
 )
@@ -20,16 +22,21 @@ func runRunner() {
 
 	taskPool := createRunnerJobPool()
 
+	// If --register is passed, try to register the runner if not already registered
 	if runnerStartArgs.register {
 
 		initRunnerRegistrationToken()
 
 		if util.Config.Runner.Token == "" {
 
-			err := taskPool.Register(configFile)
+			for {
+				err := taskPool.Register(configFile)
 
-			if err != nil {
-				panic(err)
+				if err == nil {
+					break
+				}
+
+				time.Sleep(5 * time.Second)
 			}
 
 			_ = util.ConfigInit(persistentFlags.configPath, persistentFlags.noConfig)
