@@ -61,7 +61,7 @@ type Task struct {
 
 	Message string `db:"message" json:"message,omitempty"`
 
-	// CommitMessage is a git commit hash of playbook repository which
+	// CommitHash is a git commit hash of playbook repository which
 	// was active when task was created.
 	CommitHash *string `db:"commit_hash" json:"commit_hash,omitempty"`
 	// CommitMessage contains message retrieved from git repository after checkout to CommitHash.

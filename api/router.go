@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"embed"
 	"fmt"
-	"github.com/semaphoreui/semaphore/pro_interfaces"
 	"net/http"
 	"os"
 	"path"
 	"strings"
 	"time"
+
+	"github.com/semaphoreui/semaphore/pro_interfaces"
 
 	proApi "github.com/semaphoreui/semaphore/pro/api"
 	proProjects "github.com/semaphoreui/semaphore/pro/api/projects"
@@ -104,11 +105,11 @@ func Route(
 	repositoryController := projects.NewRepositoryController(accessKeyInstallationService)
 	keyController := projects.NewKeyController(accessKeyService)
 	projectsController := projects.NewProjectsController(accessKeyService)
-	terraformController := proApi.NewTerraformController(encryptionService, terraformStore)
+	terraformController := proApi.NewTerraformController(encryptionService, terraformStore, store)
 	terraformInventoryController := proProjects.NewTerraformInventoryController(terraformStore)
 	userController := NewUserController(subscriptionService)
 	usersController := NewUsersController(subscriptionService)
-	subscriptionController := proApi.NewSubscriptionController(store)
+	subscriptionController := proApi.NewSubscriptionController(store, store)
 	projectRunnerController := proProjects.NewProjectRunnerController()
 	taskController := projects.NewTaskController(ansibleTaskRepo)
 
@@ -318,6 +319,7 @@ func Route(
 	projectUserAPI.Path("/integrations").HandlerFunc(projects.GetIntegrations).Methods("GET", "HEAD")
 	projectUserAPI.Path("/integrations").HandlerFunc(projects.AddIntegration).Methods("POST")
 	projectUserAPI.Path("/backup").HandlerFunc(projects.GetBackup).Methods("GET", "HEAD")
+	projectUserAPI.Path("/notifications/test").HandlerFunc(projectController.SendTestNotification).Methods("POST")
 
 	projectUserAPI.Path("/runners").HandlerFunc(projectRunnerController.GetRunners).Methods("GET", "HEAD")
 	projectUserAPI.Path("/runners").HandlerFunc(projectRunnerController.AddRunner).Methods("POST")
@@ -359,6 +361,22 @@ func Route(
 	projectUserManagement.HandleFunc("/{user_id}", projects.GetUsers).Methods("GET", "HEAD")
 	projectUserManagement.HandleFunc("/{user_id}", projects.UpdateUser).Methods("PUT")
 	projectUserManagement.HandleFunc("/{user_id}", projects.RemoveUser).Methods("DELETE")
+
+	//
+	// Manage project invites
+	projectInvitesAPI := authenticatedAPI.PathPrefix("/project/{project_id}").Subrouter()
+	projectInvitesAPI.Use(projects.ProjectMiddleware, projects.GetMustCanMiddleware(db.CanManageProjectUsers))
+	projectInvitesAPI.Path("/invites").HandlerFunc(projects.GetInvites).Methods("GET", "HEAD")
+	projectInvitesAPI.Path("/invites").HandlerFunc(projects.CreateInvite).Methods("POST")
+
+	projectInviteManagement := projectInvitesAPI.PathPrefix("/invites").Subrouter()
+	projectInviteManagement.Use(projects.InviteMiddleware)
+	projectInviteManagement.HandleFunc("/{invite_id}", projects.GetInvites).Methods("GET", "HEAD")
+	projectInviteManagement.HandleFunc("/{invite_id}", projects.UpdateInvite).Methods("PUT")
+	projectInviteManagement.HandleFunc("/{invite_id}", projects.DeleteInvite).Methods("DELETE")
+
+	// Accept invite endpoint (doesn't require project context)
+	authenticatedAPI.Path("/invites/accept").HandlerFunc(projects.AcceptInvite).Methods("POST")
 
 	//
 	// Project resources CRUD (continue)
@@ -543,6 +561,13 @@ func servePublic(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Check if this is a request for the swagger UI
+	swaggerPath := path.Join(webPath, "swagger")
+	if reqPath == swaggerPath || reqPath == swaggerPath+"/" {
+		serveFile(w, r, "swagger/index.html")
+		return
+	}
+
 	if !strings.Contains(reqPath, ".") {
 		serveFile(w, r, "index.html")
 		return
@@ -638,6 +663,7 @@ func getSystemInfo(w http.ResponseWriter, r *http.Request) {
 		"premium_features":  proFeatures.GetFeatures(user),
 		"git_client":        util.Config.GitClientId,
 		"schedule_timezone": timezone,
+		"teams":             util.Config.Teams,
 	}
 
 	helpers.WriteJSON(w, http.StatusOK, body)

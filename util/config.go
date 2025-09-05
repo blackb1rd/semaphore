@@ -178,6 +178,34 @@ type DebuggingConfig struct {
 	PprofDumpDir string `json:"pprof_dump_dir,omitempty" env:"SEMAPHORE_PPROF_DUMP_DIR"`
 }
 
+type HARedisConfig struct {
+	Addr          string `json:"addr,omitempty" env:"SEMAPHORE_HA_REDIS_ADDR"`
+	DB            int    `json:"db,omitempty" env:"SEMAPHORE_HA_REDIS_DB"`
+	Pass          string `json:"pass,omitempty" env:"SEMAPHORE_HA_REDIS_PASS"`
+	User          string `json:"user,omitempty" env:"SEMAPHORE_HA_REDIS_USER"`
+	TLS           bool   `json:"tls,omitempty" env:"SEMAPHORE_HA_REDIS_TLS"`
+	TLSSkipVerify bool   `json:"tls_skip_verify,omitempty" env:"SEMAPHORE_HA_REDIS_TLS_SKIP_VERIFY"`
+}
+
+type HAConfig struct {
+	Enabled bool           `json:"enabled" env:"SEMAPHORE_HA_ENABLED"`
+	Redis   *HARedisConfig `json:"redis,omitempty"`
+}
+
+type TeamInviteType string
+
+const (
+	TeamInviteEmail    TeamInviteType = "email"
+	TeamInviteUsername TeamInviteType = "username"
+	TeamInviteBoth     TeamInviteType = "both"
+)
+
+type TeamsConfig struct {
+	InvitesEnabled  bool           `json:"invites_enabled,omitempty" env:"SEMAPHORE_TEAMS_INVITES_ENABLED"`
+	InviteType      TeamInviteType `json:"invite_type,omitempty" env:"SEMAPHORE_TEAMS_INVITE_TYPE" default:"username"`
+	MembersCanLeave bool           `json:"members_can_leave,omitempty" env:"SEMAPHORE_TEAMS_MEMBERS_CAN_LEAVE"`
+}
+
 // ConfigType mapping between Config and the json file that sets it
 type ConfigType struct {
 	MySQL    *DbConfig `json:"mysql,omitempty"`
@@ -281,6 +309,8 @@ type ConfigType struct {
 
 	ForwardedEnvVars []string `json:"forwarded_env_vars,omitempty" env:"SEMAPHORE_FORWARDED_ENV_VARS"`
 
+	Teams *TeamsConfig `json:"teams,omitempty"`
+
 	Log *ConfigLog `json:"log,omitempty"`
 
 	Process *ConfigProcess `json:"process,omitempty"`
@@ -288,6 +318,8 @@ type ConfigType struct {
 	Schedule *ScheduleConfig `json:"schedule,omitempty"`
 
 	Debugging *DebuggingConfig `json:"debugging,omitempty"`
+
+	HA *HAConfig `json:"ha,omitempty"`
 }
 
 func NewConfigType() *ConfigType {
