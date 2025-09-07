@@ -49,7 +49,7 @@ jobs:
 
       - name: Run release
         run: |
-          GITHUB_TOKEN=${{ secrets.GH_TOKEN }} task release:prod
+          GITHUB_TOKEN=${{ secrets.GH_TOKEN }} PROJECT_NAME=semaphore task release:prod
 
   deploy-beta:
     runs-on: ubuntu-latest
