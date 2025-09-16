@@ -13,13 +13,11 @@ func (d *SqlDb) CreateTaskStage(stage db.TaskStage) (res db.TaskStage, err error
 	insertID, err := d.insert(
 		"id",
 		"insert into task__stage "+
-			"(task_id, `start`, `end`, start_output_id, end_output_id, `type`) VALUES "+
-			"(?, ?, ?, ?, ?, ?)",
+			"(task_id, `start`, `end`, `type`) VALUES "+
+			"(?, ?, ?, ?)",
 		stage.TaskID,
 		stage.Start,
 		stage.End,
-		stage.StartOutputID,
-		stage.EndOutputID,
 		stage.Type)
 
 	if err != nil {
@@ -31,11 +29,10 @@ func (d *SqlDb) CreateTaskStage(stage db.TaskStage) (res db.TaskStage, err error
 	return
 }
 
-func (d *SqlDb) EndTaskStage(taskID int, stageID int, end time.Time, endOutputID int) (err error) {
+func (d *SqlDb) EndTaskStage(taskID int, stageID int, end time.Time) (err error) {
 	_, err = d.exec(
-		"update task__stage set `end`=?, end_output_id=? where task_id=? and id=?",
+		"update task__stage set `end`=? where task_id=? and id=?",
 		end,
-		endOutputID,
 		taskID,
 		stageID)
 
@@ -374,27 +371,10 @@ func (d *SqlDb) GetTaskStageOutputs(projectID int, taskID int, stageID int) (out
 		return
 	}
 
-	stage, err := d.getTaskStage(taskID, stageID)
-
-	if err != nil {
-		return
-	}
-
 	q := squirrel.Select("id", "task_id", "time", "output").
 		From("task__output").
-		Where("task_id=?", taskID)
-
-	if stage.StartOutputID != nil {
-		q = q.Where(squirrel.GtOrEq{"id": stage.StartOutputID})
-	} else {
-		q = q.Where(squirrel.GtOrEq{"created": stage.Start})
-	}
-
-	if stage.EndOutputID != nil {
-		q = q.Where(squirrel.LtOrEq{"id": stage.EndOutputID})
-	} else {
-		q = q.Where(squirrel.LtOrEq{"created": stage.End})
-	}
+		Where("task_id=?", taskID).
+		Where("stage_id=?", stageID)
 
 	query, args, err := q.ToSql()
 	if err != nil {

@@ -217,13 +217,11 @@ const (
 )
 
 type TaskStage struct {
-	ID            int           `db:"id" json:"id"`
-	TaskID        int           `db:"task_id" json:"task_id"`
-	Start         *time.Time    `db:"start" json:"start"`
-	End           *time.Time    `db:"end" json:"end"`
-	StartOutputID *int          `db:"start_output_id" json:"start_output_id"`
-	EndOutputID   *int          `db:"end_output_id" json:"end_output_id"`
-	Type          TaskStageType `db:"type" json:"type"`
+	ID     int           `db:"id" json:"id"`
+	TaskID int           `db:"task_id" json:"task_id"`
+	Start  *time.Time    `db:"start" json:"start"`
+	End    *time.Time    `db:"end" json:"end"`
+	Type   TaskStageType `db:"type" json:"type"`
 }
 
 type TaskStageWithResult struct {

@@ -1,9 +1,10 @@
 package bolt
 
 import (
+	"time"
+
 	"github.com/semaphoreui/semaphore/db"
 	"go.etcd.io/bbolt"
-	"time"
 )
 
 func (d *BoltDb) CreateTaskStage(stage db.TaskStage) (db.TaskStage, error) {
@@ -32,13 +33,11 @@ func (d *BoltDb) GetTaskStages(projectID int, taskID int) (res []db.TaskStageWit
 	res = make([]db.TaskStageWithResult, len(stages))
 	for i, stage := range stages {
 		res[i] = db.TaskStageWithResult{
-			ID:            stage.ID,
-			TaskID:        stage.TaskID,
-			Start:         stage.Start,
-			End:           stage.End,
-			StartOutputID: stage.StartOutputID,
-			EndOutputID:   stage.EndOutputID,
-			Type:          stage.Type,
+			ID:     stage.ID,
+			TaskID: stage.TaskID,
+			Start:  stage.Start,
+			End:    stage.End,
+			Type:   stage.Type,
 		}
 	}
 
@@ -279,7 +278,7 @@ func (d *BoltDb) GetTaskOutputs(projectID int, taskID int, params db.RetrieveQue
 	return
 }
 
-func (d *BoltDb) EndTaskStage(taskID int, stageID int, end time.Time, endOutputID int) error {
+func (d *BoltDb) EndTaskStage(taskID int, stageID int, end time.Time) error {
 	return nil
 }
 
