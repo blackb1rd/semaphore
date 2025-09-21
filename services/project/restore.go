@@ -130,11 +130,11 @@ func (e BackupAccessKey) Restore(store db.Store, b *BackupDB) error {
 	}
 
 	if e.SourceStorage != nil {
-		storage := findEntityByName[db.SecretStorage](e.SourceStorage, b.secretStorages)
-		if storage == nil {
+		sourceStorage := findEntityByName[db.SecretStorage](e.SourceStorage, b.secretStorages)
+		if sourceStorage == nil {
 			return fmt.Errorf("secret storage does not exist in secret_storage[].name")
 		}
-		key.StorageID = &storage.ID
+		key.SourceStorageID = &sourceStorage.ID
 	}
 
 	newKey, err := store.CreateAccessKey(key)
