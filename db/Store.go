@@ -385,8 +385,9 @@ type TaskManager interface {
 	DeleteTaskWithOutputs(projectID int, taskID int) error
 	GetTaskOutputs(projectID int, taskID int, params RetrieveQueryParams) ([]TaskOutput, error)
 	CreateTaskOutput(output TaskOutput) (TaskOutput, error)
+	InsertTaskOutputBatch(output []TaskOutput) error
 	CreateTaskStage(stage TaskStage) (TaskStage, error)
-	EndTaskStage(taskID int, stageID int, end time.Time, endOutputID int) error
+	EndTaskStage(taskID int, stageID int, end time.Time) error
 	CreateTaskStageResult(taskID int, stageID int, result map[string]any) error
 	GetTaskStages(projectID int, taskID int) ([]TaskStageWithResult, error)
 	GetTaskStageResult(projectID int, taskID int, stageID int) (TaskStageResult, error)

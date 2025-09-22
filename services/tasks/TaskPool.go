@@ -22,9 +22,10 @@ import (
 )
 
 type logRecord struct {
-	task   *TaskRunner
-	output string
-	time   time.Time
+	task         *TaskRunner
+	output       string
+	time         time.Time
+	currentStage *db.TaskStage
 }
 
 type EventType uint
@@ -34,6 +35,11 @@ const (
 	EventTypeFinished EventType = 1
 	EventTypeFailed   EventType = 2
 	EventTypeEmpty    EventType = 3
+)
+
+const (
+	TaskOutputBatchSize        = 500
+	TaskOutputInsertIntervalMs = 500
 )
 
 type PoolEvent struct {
@@ -153,9 +159,7 @@ func (p *TaskPool) GetTaskByAlias(alias string) (task *TaskRunner) {
 func (p *TaskPool) Run() {
 	ticker := time.NewTicker(5 * time.Second)
 
-	defer func() {
-		ticker.Stop()
-	}()
+	defer ticker.Stop()
 
 	go p.handleQueue()
 	go p.handleLogs()
@@ -226,23 +230,49 @@ func (p *TaskPool) handleQueue() {
 }
 
 func (p *TaskPool) handleLogs() {
+	logTicker := time.NewTicker(TaskOutputInsertIntervalMs * time.Millisecond)
 
-	for record := range p.logger {
-		db.StoreSession(p.store, "logger", func() {
+	defer logTicker.Stop()
 
-			newOutput, err := p.store.CreateTaskOutput(db.TaskOutput{
-				TaskID: record.task.Task.ID,
-				Output: record.output,
-				Time:   record.time,
-			})
+	logs := make([]logRecord, 0)
 
-			if err != nil {
-				log.Error(err)
-				return
+	for {
+
+		select {
+		case record := <-p.logger:
+			logs = append(logs, record)
+
+			if len(logs) >= TaskOutputBatchSize {
+				p.flushLogs(&logs)
 			}
+		case <-logTicker.C:
+			p.flushLogs(&logs)
+		}
+	}
+}
 
-			currentOutput := record.task.currentOutput
-			record.task.currentOutput = &newOutput
+func (p *TaskPool) flushLogs(logs *[]logRecord) {
+	if len(*logs) > 0 {
+		p.writeLogs(*logs)
+		*logs = (*logs)[:0]
+	}
+}
+
+func (p *TaskPool) writeLogs(logs []logRecord) {
+
+	taskOutput := make([]db.TaskOutput, 0)
+
+	for _, record := range logs {
+		newOutput := db.TaskOutput{
+			TaskID: record.task.Task.ID,
+			Output: record.output,
+			Time:   record.time,
+		}
+
+		currentOutput := record.task.currentOutput
+		record.task.currentOutput = &newOutput
+
+		db.StoreSession(p.store, "logger", func() {
 
 			newStage, newState, err := stage_parsers.MoveToNextStage(
 				p.store,
@@ -265,8 +295,21 @@ func (p *TaskPool) handleLogs() {
 			if newStage != nil {
 				record.task.currentStage = newStage
 			}
+
+			if record.task.currentStage != nil {
+				newOutput.StageID = &record.task.currentStage.ID
+			}
 		})
+		taskOutput = append(taskOutput, newOutput)
 	}
+
+	db.StoreSession(p.store, "logger", func() {
+		err := p.store.InsertTaskOutputBatch(taskOutput)
+		if err != nil {
+			log.Error(err)
+			return
+		}
+	})
 }
 
 func runTask(task *TaskRunner, p *TaskPool) {
