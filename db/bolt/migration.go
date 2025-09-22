@@ -2,6 +2,8 @@ package bolt
 
 import (
 	"encoding/json"
+	"fmt"
+
 	"github.com/semaphoreui/semaphore/db"
 	"go.etcd.io/bbolt"
 )
@@ -82,6 +84,47 @@ func (d *BoltDb) TryRollbackMigration(m db.Migration) {
 
 type migration struct {
 	db *bbolt.DB
+}
+
+func (d migration) createObjectTx(tx *bbolt.Tx, projectID string, objectPrefix string, object map[string]any) (newObjectID string, err error) {
+	b, err := tx.CreateBucketIfNotExists([]byte("project__" + objectPrefix + "_" + projectID))
+
+	if err != nil {
+		return
+	}
+
+	var objID objectID
+
+	id, err := b.NextSequence()
+	if err != nil {
+		return
+	}
+	objID = intObjectID(id)
+
+	if objID == nil {
+		err = fmt.Errorf("object ID can not be nil")
+		return
+	}
+
+	j, err := json.Marshal(object)
+	if err != nil {
+		return
+	}
+
+	objIDBytes := objID.ToBytes()
+	newObjectID = string(objIDBytes)
+
+	return newObjectID, b.Put(objIDBytes, j)
+}
+
+func (d migration) createObject(projectID string, objectPrefix string, object map[string]any) (newObjectID string, err error) {
+
+	_ = d.db.Update(func(tx *bbolt.Tx) error {
+		newObjectID, err = d.createObjectTx(tx, projectID, objectPrefix, object)
+		return err
+	})
+
+	return
 }
 
 func (d migration) getProjectIDs() (projectIDs []string, err error) {
