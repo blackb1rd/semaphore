@@ -53,6 +53,8 @@ func (d *BoltDb) ApplyMigration(m db.Migration) (err error) {
 		err = migration_2_10_33{migration{d.db}}.Apply()
 	case "2.14.7":
 		err = migration_2_14_7{migration{d.db}}.Apply()
+	case "2.17.0":
+		err = migration_2_17_0{migration{d.db}}.Apply()
 	}
 
 	if err != nil {
