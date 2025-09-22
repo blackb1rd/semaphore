@@ -106,7 +106,6 @@
     </v-toolbar>
 
     <v-tabs show-arrows class="pl-4" v-model="viewTab">
-      <v-tab :to="getViewUrl(null)" :disabled="viewItemsLoading">{{ $t('all') }}</v-tab>
 
       <v-tab
         v-for="(view) in views"

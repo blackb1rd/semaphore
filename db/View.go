@@ -12,8 +12,8 @@ type View struct {
 	ProjectID int      `db:"project_id" json:"project_id" backup:"-"`
 	Title     string   `db:"title" json:"title"`
 	Position  int      `db:"position" json:"position"`
-	Type      ViewType `db:"type" json:"type"`
-	Hidden    bool     `db:"hidden" json:"hidden"`
+	Type      ViewType `db:"type" json:"type,omitempty"`
+	Hidden    bool     `db:"hidden" json:"hidden,omitempty"`
 }
 
 func (view *View) Validate() error {
