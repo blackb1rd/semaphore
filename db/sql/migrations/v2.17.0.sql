@@ -1,6 +1,7 @@
 -- Add hidden and type fields to project__view table
 alter table project__view add column `hidden` boolean not null default false;
 alter table project__view add column `type` varchar(20) not null default '';
+alter table project__view add column `filter` varchar(1000);
 
 -- Create All view with position -1 for each existing project
 insert into project__view (project_id, title, position, hidden, type)
