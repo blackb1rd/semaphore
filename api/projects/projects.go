@@ -355,6 +355,18 @@ func (c *ProjectsController) AddProject(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	_, err = store.CreateView(db.View{
+		ProjectID: body.ID,
+		Title:     "All",
+		Position:  0,
+		Type:      db.ViewTypeAll,
+	})
+
+	if err != nil {
+		helpers.WriteError(w, err)
+		return
+	}
+
 	//_, err = store.CreateInventory(db.Inventory{
 	//	Name:      "None",
 	//	ProjectID: body.ID,
