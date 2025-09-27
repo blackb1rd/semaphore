@@ -121,7 +121,11 @@ func (d *BoltDb) GetTemplates(projectID int, filter db.TemplateFilter, params db
 	switch sortColumn {
 	case "name":
 		sort.Slice(templates, func(i, j int) bool {
-			return (templates[i].Name < templates[j].Name) != sortReverse
+			if sortReverse {
+				return templates[i].Name > templates[j].Name
+			} else {
+				return templates[i].Name < templates[j].Name
+			}
 		})
 	}
 
