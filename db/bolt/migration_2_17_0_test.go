@@ -41,5 +41,6 @@ func TestMigration_2_17_0_Apply(t *testing.T) {
 	err = json.Unmarshal(s1, &res)
 
 	assert.NoError(t, err)
+	assert.Equal(t, 1.0, res["id"])
 	assert.Equal(t, "all", res["type"])
 }

@@ -1,5 +1,7 @@
 package bolt
 
+import "strconv"
+
 type migration_2_17_0 struct {
 	migration
 }
@@ -12,10 +14,11 @@ func (d migration_2_17_0) Apply() (err error) {
 	}
 
 	for _, projectID := range projectIDs {
-		_, err2 := d.createObject(projectID, "view", map[string]any{
-			"project_id": projectID,
+		id, err2 := strconv.Atoi(projectID)
+		_, err2 = d.createObject(projectID, "view", map[string]any{
+			"project_id": id,
 			"type":       "all",
-			"position":   1,
+			"position":   -1,
 			"title":      "All",
 		})
 		if err2 != nil {

@@ -108,6 +108,8 @@ func (d migration) createObjectTx(tx *bbolt.Tx, projectID string, objectPrefix s
 		return
 	}
 
+	object["id"] = objID
+
 	j, err := json.Marshal(object)
 	if err != nil {
 		return
