@@ -109,6 +109,12 @@
 
             </div>
 
+            <v-checkbox
+              hide-details
+              label="Hidden"
+              v-model="view.hidden"
+              @change="saveView(view.id)"
+            />
           </v-card-text>
 
         </v-card>
@@ -127,7 +133,7 @@
 <script>
 import draggable from 'vuedraggable';
 import axios from 'axios';
-import ArgsPicker from '@/components/ArgsPicker.vue';
+// import ArgsPicker from '@/components/ArgsPicker.vue';
 
 export default {
   props: {
@@ -135,7 +141,7 @@ export default {
   },
 
   components: {
-    ArgsPicker,
+    // ArgsPicker,
     draggable,
   },
 
@@ -221,6 +227,7 @@ export default {
               type: view.type,
               sort_column: view.sort_column,
               sort_reverse: view.sort_reverse,
+              hidden: view.hidden,
             },
           })).data;
           view.id = newView.id;
@@ -237,6 +244,7 @@ export default {
               type: view.type,
               sort_column: view.sort_column,
               sort_reverse: view.sort_reverse,
+              hidden: view.hidden,
             },
           });
         }

@@ -112,6 +112,9 @@
         :key="view.id"
         :to="getViewUrl(view.id)"
         :disabled="viewItemsLoading"
+        :style="{
+          'text-decoration': view.hidden ? 'line-through' : 'none',
+        }"
       >{{ view.title }}
       </v-tab>
 
@@ -287,11 +290,7 @@ export default {
     premiumFeatures: Object,
   },
   mixins: [ItemListPageBase, AppsMixin],
-  async created() {
-    socket.addListener((data) => this.onWebsocketDataReceived(data));
 
-    await this.loadData();
-  },
   data() {
     return {
       TEMPLATE_TYPE_ICONS,
@@ -311,6 +310,7 @@ export default {
       itemApp: '',
     };
   },
+
   computed: {
 
     viewId() {
@@ -351,9 +351,27 @@ export default {
       }
     },
   },
+
+  async created() {
+    socket.addListener((data) => this.onWebsocketDataReceived(data));
+    await this.loadData();
+  },
+
   methods: {
     async beforeLoadItems() {
       await this.loadViews();
+      if (this.viewId == null) {
+        let viewId = localStorage.getItem(`project${this.projectId}__lastVisitedViewId`);
+
+        if (viewId == null) {
+          viewId = this.views[0]?.id;
+        }
+
+        if (viewId != null
+          && this.views.some((v) => v.id === parseInt(viewId, 10))) {
+          await this.$router.push({ path: `/project/${this.projectId}/views/${viewId}/templates` });
+        }
+      }
     },
 
     allowActions() {
@@ -372,7 +390,7 @@ export default {
         method: 'get',
         url: `/api/project/${this.projectId}/views`,
         responseType: 'json',
-      })).data;
+      })).data.filter((v) => !v.hidden || this.can(this.USER_PERMISSIONS.manageProjectResources));
       this.views.sort((v1, v2) => v1.position - v2.position);
 
       if (this.viewId != null && !this.views.some((v) => v.id === this.viewId)) {
