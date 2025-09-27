@@ -79,15 +79,7 @@
               label="Type"
               outlined
               dense
-            />
-
-            <ArgsPicker
-              v-if="view.type !== ''"
-              :vars="view.filters"
-              @change="setLimit"
-              :title="$t('Filters')"
-              :arg-title="$t('Filter')"
-              :add-arg-title="$t('Add filter')"
+              @change="saveView(view.id)"
             />
 
             <div
@@ -104,6 +96,7 @@
                 outlined
                 dense
                 hide-details
+                @change="saveView(view.id)"
               />
 
               <v-checkbox
@@ -111,6 +104,7 @@
                 label="Reverse"
                 v-model="view.sort_reverse"
                 class="mt-0 pt-0"
+                @change="saveView(view.id)"
               />
 
             </div>
@@ -224,6 +218,9 @@ export default {
               project_id: this.projectId,
               title: view.title,
               position: i,
+              type: view.type,
+              sort_column: view.sort_column,
+              sort_reverse: view.sort_reverse,
             },
           })).data;
           view.id = newView.id;
@@ -237,6 +234,9 @@ export default {
               project_id: this.projectId,
               title: view.title,
               position: i,
+              type: view.type,
+              sort_column: view.sort_column,
+              sort_reverse: view.sort_reverse,
             },
           });
         }

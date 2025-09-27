@@ -167,6 +167,15 @@ func (d *SqlDb) GetTemplates(projectID int, filter db.TemplateFilter, params db.
 		LastTaskID *int `db:"last_task_id"`
 	}
 
+	var view db.View
+
+	if filter.ViewID != nil {
+		view, err = d.GetView(projectID, *filter.ViewID)
+		if err != nil {
+			return
+		}
+	}
+
 	q := squirrel.Select("pt.id",
 		"pt.project_id",
 		"pt.inventory_id",
@@ -183,7 +192,6 @@ func (d *SqlDb) GetTemplates(projectID int, filter db.TemplateFilter, params db.
 		"pt.`app`",
 		"pt.`git_branch`",
 		"pt.survey_vars",
-		"pt.start_version",
 		"pt.`type`",
 		"pt.`tasks`",
 		"pt.runner_tag",
@@ -198,7 +206,14 @@ func (d *SqlDb) GetTemplates(projectID int, filter db.TemplateFilter, params db.
 	}
 
 	if filter.ViewID != nil {
-		q = q.Where("pt.view_id=?", *filter.ViewID)
+		switch view.Type {
+		case db.ViewTypeCustom:
+			q = q.Where("pt.view_id=?", *filter.ViewID)
+		case db.ViewTypeAll:
+			if view.Filter != nil {
+				// TODO: implement filter
+			}
+		}
 	}
 
 	if filter.BuildTemplateID != nil {
@@ -209,14 +224,24 @@ func (d *SqlDb) GetTemplates(projectID int, filter db.TemplateFilter, params db.
 	}
 
 	order := "ASC"
-	if pp.SortInverted {
-		order = "DESC"
+	var sortBy string
+
+	if pp.SortBy != "" { // order by query param has priority
+		sortBy = pp.SortBy
+		if pp.SortInverted {
+			order = "DESC"
+		}
+	} else if filter.ViewID != nil && view.SortColumn != nil {
+		sortBy = *view.SortColumn
+		if view.SortReverse {
+			order = "DESC"
+		}
 	}
 
-	switch pp.SortBy {
+	switch sortBy {
 	case "name", "playbook":
 		q = q.Where("pt.project_id=?", projectID).
-			OrderBy("pt." + pp.SortBy + " " + order)
+			OrderBy("pt." + sortBy + " " + order)
 	case "inventory":
 		q = q.LeftJoin("project__inventory pi ON (pt.inventory_id = pi.id)").
 			Where("pt.project_id=?", projectID).
