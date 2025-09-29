@@ -162,6 +162,13 @@ type ConfigLog struct {
 	Tasks  *TaskLogType  `json:"tasks,omitempty"`
 }
 
+type SyslogConfig struct {
+	Enabled bool   `json:"enabled" env:"SEMAPHORE_SYSLOG_ENABLED"`
+	Network string `json:"network,omitempty" env:"SEMAPHORE_SYSLOG_NETWORK"`
+	Address string `json:"address,omitempty" env:"SEMAPHORE_SYSLOG_ADDRESS"`
+	Tag     string `json:"tag,omitempty" env:"SEMAPHORE_SYSLOG_TAG"`
+}
+
 type ConfigProcess struct {
 	User   string `json:"user,omitempty" env:"SEMAPHORE_PROCESS_USER"`
 	UID    *int   `json:"uid,omitempty" env:"SEMAPHORE_PROCESS_UID"`
@@ -320,6 +327,8 @@ type ConfigType struct {
 	Debugging *DebuggingConfig `json:"debugging,omitempty"`
 
 	HA *HAConfig `json:"ha,omitempty"`
+
+	Syslog *SyslogConfig `json:"syslog,omitempty"`
 }
 
 func NewConfigType() *ConfigType {
