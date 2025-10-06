@@ -1,51 +1,39 @@
 <template>
   <EditDialog
     v-model="dialog"
-    :save-button-text="(
-      itemId === 'new'
-        ? (invitesEnabled ? 'Invite' : 'Link')
-        : $t('save')
-    )"
-    :title="$t('teamMember', { expr: itemId === 'new' ? $t('nnew') : $t('edit') })"
+    :save-button-text="itemId === 'new' ? $t('create') : $t('save')"
+    :title="$t('templatePermission', { expr: itemId === 'new' ? $t('nnew') : $t('edit') })"
     @save="onSave"
   >
     <template v-slot:form="{ onSave, onError, needSave, needReset }">
-      <TeamMemberForm
+      <EditTemplatePermissionForm
         :project-id="projectId"
+        :template-id="templateId"
         :item-id="itemId"
         @save="onSave"
         @error="onError"
         :need-save="needSave"
         :need-reset="needReset"
-        :invites-enabled="invitesEnabled"
-        :invite-type="inviteType"
-        :roles="roles"
       />
     </template>
   </EditDialog>
-
 </template>
-
-<style lang="scss">
-</style>
 
 <script>
 import EditDialog from './EditDialog.vue';
-import TeamMemberForm from './TeamMemberForm.vue';
+import EditTemplatePermissionForm from './EditTemplatePermissionForm.vue';
 
 export default {
   components: {
     EditDialog,
-    TeamMemberForm,
+    EditTemplatePermissionForm,
   },
 
   props: {
     value: Boolean,
     projectId: Number,
+    templateId: [String, Number],
     itemId: [String, Number],
-    invitesEnabled: Boolean,
-    inviteType: String,
-    roles: Array,
   },
 
   data() {

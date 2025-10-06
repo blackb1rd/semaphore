@@ -267,6 +267,7 @@ type ProjectInviteRepository interface {
 // TemplateManager handles template-related operations
 type TemplateManager interface {
 	GetTemplates(projectID int, filter TemplateFilter, params RetrieveQueryParams) ([]Template, error)
+	GetTemplatesWithPermissions(projectID int, userID int, filter TemplateFilter, params RetrieveQueryParams) ([]TemplateWithPerms, error)
 	GetTemplateRefs(projectID int, templateID int) (ObjectReferrers, error)
 	CreateTemplate(template Template) (Template, error)
 	UpdateTemplate(template Template) error
@@ -276,6 +277,13 @@ type TemplateManager interface {
 	GetTemplateVaults(projectID int, templateID int) ([]TemplateVault, error)
 	CreateTemplateVault(vault TemplateVault) (TemplateVault, error)
 	UpdateTemplateVaults(projectID int, templateID int, vaults []TemplateVault) error
+
+	GetTemplatePermission(projectID int, templateID int, userID int) (ProjectUserPermission, error)
+	GetTemplateRoles(projectID int, templateID int) ([]TemplateRolePerm, error)
+	CreateTemplateRole(role TemplateRolePerm) (TemplateRolePerm, error)
+	DeleteTemplateRole(projectID int, templateID int, permID int) error
+	UpdateTemplateRole(role TemplateRolePerm) error
+	GetTemplateRole(projectID int, templateID int, permID int) (TemplateRolePerm, error)
 }
 
 // InventoryManager handles inventory-related operations
@@ -457,6 +465,15 @@ type SecretStorageRepository interface {
 	DeleteSecretStorage(projectID int, storageID int) error
 }
 
+type RoleRepository interface {
+	GetRole(roleID int) (Role, error)
+	GetRoleBySlug(slug string) (Role, error)
+	GetRoles() ([]Role, error)
+	UpdateRole(role Role) error
+	CreateRole(role Role) (Role, error)
+	DeleteRole(role int) error
+}
+
 // Store is the main interface that aggregates all specialized interfaces
 type Store interface {
 	ConnectionManager
@@ -479,6 +496,7 @@ type Store interface {
 	RunnerManager
 	EventManager
 	SecretStorageRepository
+	RoleRepository
 }
 
 var AccessKeyProps = ObjectProps{
@@ -601,6 +619,14 @@ var SecretStorageProps = ObjectProps{
 	Type:                  reflect.TypeOf(SecretStorage{}),
 	PrimaryColumnName:     "id",
 	Ownerships:            []*ObjectProps{&ProjectProps},
+}
+
+var RoleProps = ObjectProps{
+	TableName:         "role",
+	Type:              reflect.TypeOf(Role{}),
+	PrimaryColumnName: "id",
+	IsGlobal:          true,
+	SortableColumns:   []string{"name"},
 }
 
 var UserProps = ObjectProps{

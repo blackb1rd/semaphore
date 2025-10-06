@@ -3,6 +3,8 @@ package sql
 import (
 	"encoding/json"
 
+	"errors"
+
 	"github.com/Masterminds/squirrel"
 	"github.com/semaphoreui/semaphore/db"
 )
@@ -153,17 +155,17 @@ func (d *SqlDb) SetTemplateDescription(projectID int, templateID int, descriptio
 	return
 }
 
-func (d *SqlDb) GetTemplates(projectID int, filter db.TemplateFilter, params db.RetrieveQueryParams) (templates []db.Template, err error) {
+func (d *SqlDb) getTemplates(projectID int, userID *int, filter db.TemplateFilter, params db.RetrieveQueryParams) (templates []db.TemplateWithPerms, err error) {
 
 	pp, err := params.Validate(db.TemplateProps)
 	if err != nil {
 		return
 	}
 
-	templates = []db.Template{}
+	templates = make([]db.TemplateWithPerms, 0)
 
 	type templateWithLastTask struct {
-		db.Template
+		db.TemplateWithPerms
 		LastTaskID *int `db:"last_task_id"`
 	}
 
@@ -176,7 +178,8 @@ func (d *SqlDb) GetTemplates(projectID int, filter db.TemplateFilter, params db.
 		}
 	}
 
-	q := squirrel.Select("pt.id",
+	fields := []string{
+		"pt.id",
 		"pt.project_id",
 		"pt.inventory_id",
 		"pt.repository_id",
@@ -198,8 +201,18 @@ func (d *SqlDb) GetTemplates(projectID int, filter db.TemplateFilter, params db.
 		"pt.task_params",
 		"pt.allow_override_branch_in_task",
 		"pt.allow_parallel_tasks",
-		"(SELECT `id` FROM `task` WHERE template_id = pt.id ORDER BY `id` DESC LIMIT 1) last_task_id").
-		From("project__template pt")
+		"(SELECT `id` FROM `task` WHERE template_id = pt.id ORDER BY `id` DESC LIMIT 1) last_task_id",
+	}
+
+	if userID != nil {
+		fields = append(fields, "pr.permissions permissions")
+	}
+
+	q := squirrel.Select(fields...).From("project__template pt")
+
+	if userID != nil {
+		q = q.LeftJoin("project__template_role pr ON (pr.template_id = pt.id)")
+	}
 
 	if filter.App != nil {
 		q = q.Where("pt.app=?", *filter.App)
@@ -289,7 +302,7 @@ func (d *SqlDb) GetTemplates(projectID int, filter db.TemplateFilter, params db.
 	}
 
 	for _, tpl := range tpls {
-		template := tpl.Template
+		template := tpl.TemplateWithPerms
 
 		if tpl.LastTaskID != nil {
 			for _, tsk := range tasks {
@@ -323,6 +336,25 @@ func (d *SqlDb) GetTemplates(projectID int, filter db.TemplateFilter, params db.
 	return
 }
 
+func (d *SqlDb) GetTemplatesWithPermissions(projectID int, userID int, filter db.TemplateFilter, params db.RetrieveQueryParams) (templates []db.TemplateWithPerms, err error) {
+	return d.getTemplates(projectID, &userID, filter, params)
+}
+
+func (d *SqlDb) GetTemplates(projectID int, filter db.TemplateFilter, params db.RetrieveQueryParams) (templates []db.Template, err error) {
+	res, err := d.getTemplates(projectID, nil, filter, params)
+	if err != nil {
+		return
+	}
+
+	templates = make([]db.Template, 0, len(res))
+
+	for _, tpl := range res {
+		templates = append(templates, tpl.Template)
+	}
+
+	return
+}
+
 func (d *SqlDb) GetTemplate(projectID int, templateID int) (template db.Template, err error) {
 	err = d.selectOne(
 		&template,
@@ -345,4 +377,121 @@ func (d *SqlDb) DeleteTemplate(projectID int, templateID int) error {
 
 func (d *SqlDb) GetTemplateRefs(projectID int, templateID int) (db.ObjectReferrers, error) {
 	return d.getObjectRefs(projectID, db.TemplateProps, templateID)
+}
+
+func (d *SqlDb) GetTemplateRole(projectID int, templateID int, id int) (templateRole db.TemplateRolePerm, err error) {
+
+	query, args, err := squirrel.Select("*").
+		From("project__template_role").
+		Where("project_id = ?", projectID).
+		Where("template_id = ?", templateID).
+		Where("id = ?", id).
+		ToSql()
+
+	if err != nil {
+		return
+	}
+
+	err = d.selectOne(&templateRole, query, args...)
+
+	return
+}
+
+func (d *SqlDb) GetTemplatePermission(projectID int, templateID int, userID int) (perm db.ProjectUserPermission, err error) {
+	var projectUser db.ProjectUser
+	projectUser, err = d.GetProjectUser(projectID, userID)
+	if err != nil {
+		if errors.Is(err, db.ErrNotFound) {
+			err = nil // user not in project, no permissions
+		}
+		return
+	}
+
+	perm = projectUser.Role.GetPermissions()
+
+	role, err := d.GetRoleBySlug(string(projectUser.Role))
+
+	if errors.Is(err, db.ErrNotFound) {
+		err = nil
+		return
+	}
+
+	if err != nil {
+		return
+	}
+
+	query, args, err := squirrel.Select("permissions").
+		From("project__template_role").
+		Where("project_id = ?", projectID).
+		Where("template_id = ?", templateID).
+		Where("role_id = ?", role.ID).
+		ToSql()
+
+	if err != nil {
+		return
+	}
+
+	var templateRole db.TemplateRolePerm
+
+	err = d.selectOne(&templateRole, query, args...)
+
+	if errors.Is(err, db.ErrNotFound) {
+		err = nil
+		return
+	}
+
+	if err != nil {
+		return
+	}
+
+	perm |= templateRole.Permissions
+
+	return
+}
+
+func (d *SqlDb) GetTemplateRoles(projectID int, templateID int) (roles []db.TemplateRolePerm, err error) {
+	query, args, err := squirrel.Select("*").
+		From("project__template_role").
+		Where("project_id = ?", projectID).
+		Where("template_id = ?", templateID).
+		ToSql()
+
+	if err != nil {
+		return
+	}
+
+	_, err = d.selectAll(&roles, query, args...)
+	return
+}
+func (d *SqlDb) CreateTemplateRole(role db.TemplateRolePerm) (newRole db.TemplateRolePerm, err error) {
+	insertID, err := d.insert(
+		"id",
+		"insert into project__template_role (project_id, template_id, role_id, permissions) values (?, ?, ?, ?)",
+		role.ProjectID,
+		role.TemplateID,
+		role.RoleID,
+		role.Permissions)
+
+	if err != nil {
+		return
+	}
+
+	newRole = role
+	newRole.ID = insertID
+	return
+}
+func (d *SqlDb) DeleteTemplateRole(projectID int, templateID int, id int) error {
+	_, err := d.exec("delete from project__template_role where project_id=? and template_id=? and id=?", projectID, templateID, id)
+	return err
+}
+func (d *SqlDb) UpdateTemplateRole(role db.TemplateRolePerm) error {
+	_, err := d.exec(
+		"update project__template_role set permissions=? "+
+			"where project_id=? and template_id=? and id=?",
+		role.Permissions,
+		role.ProjectID,
+		role.TemplateID,
+		role.ID)
+
+	return err
 }
