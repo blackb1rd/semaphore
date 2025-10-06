@@ -23,12 +23,12 @@ type projectImportArgs struct {
 var targetProjectImportArgs projectImportArgs
 
 func init() {
-	projectAddCmd.PersistentFlags().StringVar(&targetProjectImportArgs.dir, "dir", "", "Directory path with project backups to import")
-	projectAddCmd.PersistentFlags().StringVar(&targetProjectImportArgs.file, "file", "", "Backup file path to import")
-	projectCmd.AddCommand(projectAddCmd)
+	projectImportCmd.PersistentFlags().StringVar(&targetProjectImportArgs.dir, "dir", "", "Directory path with project backups to import")
+	projectImportCmd.PersistentFlags().StringVar(&targetProjectImportArgs.file, "file", "", "Backup file path to import")
+	projectCmd.AddCommand(projectImportCmd)
 }
 
-var projectAddCmd = &cobra.Command{
+var projectImportCmd = &cobra.Command{
 	Use:   "import",
 	Short: "Import project(s)",
 	Run: func(cmd *cobra.Command, args []string) {
@@ -57,6 +57,7 @@ var projectAddCmd = &cobra.Command{
 		if targetProjectImportArgs.file != "" {
 			files = append(files, targetProjectImportArgs.file)
 		}
+
 		if targetProjectImportArgs.dir != "" {
 			dir := targetProjectImportArgs.dir
 			_ = filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
@@ -111,7 +112,7 @@ func resolveImportUser(store db.Store) (db.User, error) {
 		return db.User{}, err
 	}
 	if len(users) == 0 {
-		return db.User{}, errors.New("no users found in database; create a user first")
+		return db.User{}, errors.New("no admins found in database; create a admin first")
 	}
 	return users[0], nil
 }
