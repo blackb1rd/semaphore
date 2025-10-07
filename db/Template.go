@@ -1,7 +1,9 @@
 package db
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 )
 
 type TemplateType string
@@ -65,6 +67,57 @@ const (
 	SurveyVarSelect TemplateType = "select"
 )
 
+// SurveyVarDefaultValue supports both a single string or an array of strings in JSON.
+// It preserves whether the original JSON was an array so encoding will keep the
+// original shape when possible (single value -> string, multiple -> array).
+type SurveyVarDefaultValue struct {
+	Values           []string `json:"-"`
+	originalWasArray bool     `json:"-"`
+}
+
+func (d *SurveyVarDefaultValue) UnmarshalJSON(b []byte) error {
+	if len(bytes.TrimSpace(b)) == 0 || bytes.Equal(bytes.TrimSpace(b), []byte("null")) {
+		d.Values = nil
+		d.originalWasArray = false
+		return nil
+	}
+
+	// try string
+	var s string
+	if err := json.Unmarshal(b, &s); err == nil {
+		d.Values = []string{s}
+		d.originalWasArray = false
+		return nil
+	}
+
+	// try []string
+	var arr []string
+	if err := json.Unmarshal(b, &arr); err == nil {
+		d.Values = arr
+		d.originalWasArray = true
+		return nil
+	}
+
+	return fmt.Errorf("invalid default_value: must be string or []string")
+}
+
+func (d SurveyVarDefaultValue) MarshalJSON() ([]byte, error) {
+	if d.Values == nil {
+		return []byte("null"), nil
+	}
+	if len(d.Values) == 1 && !d.originalWasArray {
+		return json.Marshal(d.Values[0])
+	}
+	return json.Marshal(d.Values)
+}
+
+func (d SurveyVarDefaultValue) String() string {
+	if len(d.Values) == 0 {
+		return ""
+	}
+	return d.Values[0]
+}
+
 type AnsibleTemplateParams struct {
 	AllowDebug             bool     `json:"allow_debug"`
 	AllowOverrideInventory bool     `json:"allow_override_inventory"`
@@ -90,13 +143,13 @@ type SurveyVarEnumValue struct {
 }
 
 type SurveyVar struct {
-	Name         string               `json:"name" backup:"name"`
-	Title        string               `json:"title" backup:"title"`
-	Required     bool                 `json:"required,omitempty" backup:"required"`
-	Type         SurveyVarType        `json:"type,omitempty" backup:"type"`
-	Description  string               `json:"description,omitempty" backup:"description"`
-	Values       []SurveyVarEnumValue `json:"values,omitempty" backup:"values"`
-	DefaultValue string               `json:"default_value,omitempty" backup:"default_value"`
+	Name         string                 `json:"name" backup:"name"`
+	Title        string                 `json:"title" backup:"title"`
+	Required     bool                   `json:"required,omitempty" backup:"required"`
+	Type         SurveyVarType          `json:"type,omitempty" backup:"type"`
+	Description  string                 `json:"description,omitempty" backup:"description"`
+	Values       []SurveyVarEnumValue   `json:"values,omitempty" backup:"values"`
+	DefaultValue *SurveyVarDefaultValue `json:"default_value,omitempty" backup:"default_value"`
 }
 
 type TemplateFilter struct {
