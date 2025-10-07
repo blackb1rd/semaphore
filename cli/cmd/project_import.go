@@ -39,6 +39,11 @@ var projectImportCmd = &cobra.Command{
 			ok = false
 		}
 
+		if targetProjectImportArgs.dir != "" && targetProjectImportArgs.file != "" {
+			fmt.Println("Only one of --dir or --file can be specified")
+			ok = false
+		}
+
 		if !ok {
 			fmt.Println("Use command `semaphore project import --help` for details.")
 			os.Exit(1)
@@ -60,7 +65,7 @@ var projectImportCmd = &cobra.Command{
 
 		if targetProjectImportArgs.dir != "" {
 			dir := targetProjectImportArgs.dir
-			_ = filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
+			err = filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
 				if err != nil {
 					return nil
 				}
@@ -74,6 +79,9 @@ var projectImportCmd = &cobra.Command{
 				}
 				return nil
 			})
+			if err != nil {
+				return
+			}
 		}
 
 		if len(files) == 0 {
@@ -102,19 +110,28 @@ var projectImportCmd = &cobra.Command{
 	},
 }
 
-func resolveImportUser(store db.Store) (db.User, error) {
+func resolveImportUser(store db.Store) (res db.User, err error) {
 	admins, err := store.GetAllAdmins()
-	if err == nil && len(admins) > 0 {
-		return admins[0], nil
+	if err != nil {
+		return
+	}
+
+	if len(admins) > 0 {
+		res = admins[0]
+		return
 	}
 	users, err := store.GetUsers(db.RetrieveQueryParams{})
 	if err != nil {
-		return db.User{}, err
+		return
 	}
+
 	if len(users) == 0 {
-		return db.User{}, errors.New("no admins found in database; create a admin first")
+		err = errors.New("no admins found in database; create a admin first")
+		return
 	}
-	return users[0], nil
+
+	res = users[0]
+	return
 }
 
 func importProjectFromFile(path string, user db.User, store db.Store) error {
