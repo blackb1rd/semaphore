@@ -80,7 +80,7 @@
 
       <v-select
         clearable
-        v-else-if="v.type === 'enum' || v.type === 'multi_enum'"
+        v-else-if="v.type === 'enum' || v.type === 'select'"
         :label="v.title + (v.required ? ' *' : '')"
         :hint="v.description"
         v-model="editedEnvironment[v.name]"
@@ -93,18 +93,18 @@
         item-value="value"
         outlined
         dense
-        :multiple="v.type === 'multi_enum'"
-        :chips="v.type === 'multi_enum'"
+        :multiple="v.type === 'select'"
+        :chips="v.type === 'select'"
       >
-      <template v-if="v.type === 'multi_enum'" v-slot:selection="{ item, index }">
-          <v-chip
-            small
-            close
-            @click:close="deleteItem(v.name, index)"
-          >
-            {{ item.name }}
-          </v-chip>
-        </template>
+      <template v-if="v.type === 'select'" v-slot:selection="{ item, index }">
+        <v-chip
+          small
+          close
+          @click:close="deleteItem(v.name, index)"
+        >
+          {{ item.name }}
+        </v-chip>
+      </template>
     </v-select>
 
       <v-text-field
