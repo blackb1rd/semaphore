@@ -339,9 +339,14 @@ export default {
     onTypeChange(newType) {
       if (!this.editedVar) return;
       if (newType === 'select') {
-        if (!Array.isArray(this.editedVar.default_value)) this.editedVar.default_value = this.editedVar.default_value == null || this.editedVar.default_value === '' ? [] : [this.editedVar.default_value];
-      } else {
-        if (Array.isArray(this.editedVar.default_value)) this.editedVar.default_value = this.editedVar.default_value.length > 0 ? this.editedVar.default_value[0] : '';
+        if (!Array.isArray(this.editedVar.default_value)) {
+          const dv = this.editedVar.default_value;
+          this.editedVar.default_value = dv == null || dv === '' ? [] : [dv];
+        }
+      } else if (Array.isArray(this.editedVar.default_value)) {
+        this.editedVar.default_value = this.editedVar.default_value.length > 0
+          ? this.editedVar.default_value[0]
+          : '';
       }
     },
   },
