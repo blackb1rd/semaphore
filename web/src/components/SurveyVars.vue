@@ -48,7 +48,7 @@
             ></v-select>
 
             <v-data-table
-              v-if="editedVar.type === 'enum'"
+              v-if="editedVar.type === 'enum' || editedVar.type === 'select'"
               :items="editedValues"
               :items-per-page="-1"
               class="elevation-1 FieldTable"
@@ -93,7 +93,8 @@
             <div class="text-right mt-2">
               <v-btn
                 color="primary"
-                v-if="editedVar.type === 'enum'"
+                class="d-block"
+                v-if="editedVar.type === 'enum' || editedVar.type === 'select'"
                 @click="addEditedVarValue()"
               >Add Value</v-btn>
             </div>
@@ -206,6 +207,9 @@ export default {
       }, {
         id: 'enum',
         name: 'Enum',
+      }, {
+        id: 'select',
+        name: 'Select',
       }],
       formError: null,
     };
@@ -248,7 +252,7 @@ export default {
         return;
       }
 
-      if (this.editedVar.type === 'enum') {
+      if (this.editedVar.type === 'enum' || this.editedVar.type === 'select') {
         if (this.editedValues.length === 0) {
           this.formError = 'Enumeration must have values.';
           return;
