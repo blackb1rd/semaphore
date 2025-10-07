@@ -670,7 +670,7 @@ func getSystemInfo(w http.ResponseWriter, r *http.Request) {
 		timezone = "UTC"
 	}
 
-	roles, err := helpers.Store(r).GetRoles()
+	roles, err := helpers.Store(r).GetGlobalRoles()
 	if err != nil {
 		log.WithError(err).Error("Failed to get roles")
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)

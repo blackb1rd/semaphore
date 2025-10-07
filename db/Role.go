@@ -5,6 +5,7 @@ type Role struct {
 	Slug        string                `db:"slug" json:"slug"`
 	Name        string                `db:"name" json:"name"`
 	Permissions ProjectUserPermission `db:"permissions" json:"permissions"`
+	ProjectID   *int                  `db:"project_id" json:"project_id"`
 }
 
 func ValidateRole(role Role) error {

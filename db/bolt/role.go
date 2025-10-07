@@ -9,8 +9,19 @@ func (d *BoltDb) GetRole(roleID int) (role db.Role, err error) {
 	return
 }
 
-func (d *BoltDb) GetRoles() (roles []db.Role, err error) {
-	err = d.getObjects(0, db.RoleProps, db.RetrieveQueryParams{}, nil, &roles)
+func (d *BoltDb) GetProjectRoles(projectID int) (roles []db.Role, err error) {
+	err = d.getObjects(0, db.RoleProps, db.RetrieveQueryParams{}, func(i any) bool {
+		role := i.(db.Role)
+		return role.ProjectID != nil && *role.ProjectID == projectID
+	}, &roles)
+	return
+}
+
+func (d *BoltDb) GetGlobalRoles() (roles []db.Role, err error) {
+	err = d.getObjects(0, db.RoleProps, db.RetrieveQueryParams{}, func(i any) bool {
+		role := i.(db.Role)
+		return role.ProjectID == nil
+	}, &roles)
 	return
 }
 

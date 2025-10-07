@@ -8,9 +8,15 @@ func (d *SqlDb) GetRole(roleID int) (db.Role, error) {
 	return role, err
 }
 
-func (d *SqlDb) GetRoles() ([]db.Role, error) {
+func (d *SqlDb) GetProjectRoles(projectID int) ([]db.Role, error) {
 	var roles []db.Role
-	_, err := d.selectAll(&roles, "select * from `role` order by name")
+	_, err := d.selectAll(&roles, "select * from `role` where project_id=? order by name", projectID)
+	return roles, err
+}
+
+func (d *SqlDb) GetGlobalRoles() ([]db.Role, error) {
+	var roles []db.Role
+	_, err := d.selectAll(&roles, "select * from `role` where project_id is null order by name")
 	return roles, err
 }
 
@@ -27,10 +33,11 @@ func (d *SqlDb) UpdateRole(role db.Role) error {
 func (d *SqlDb) CreateRole(role db.Role) (db.Role, error) {
 	insertID, err := d.insert(
 		"id",
-		"insert into `role` (slug, name, permissions) values (?, ?, ?)",
+		"insert into `role` (slug, name, permissions, project_id) values (?, ?, ?, ?)",
 		role.Slug,
 		role.Name,
-		role.Permissions)
+		role.Permissions,
+		role.ProjectID)
 
 	if err != nil {
 		return role, err
