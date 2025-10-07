@@ -447,6 +447,16 @@ func (backup *BackupFormat) Restore(user db.User, store db.Store) (*db.Project, 
 	var b = BackupDB{}
 	project := backup.Meta.Project
 
+	// Prevent importing a project with a name that already exists
+	existingProjects, err := store.GetAllProjects()
+	if err == nil {
+		for _, p := range existingProjects {
+			if p.Name == project.Name { // exact name match
+				return nil, db.NewValidationError(fmt.Sprintf("project with name '%s' already exists", project.Name))
+			}
+		}
+	}
+
 	newProject, err := store.CreateProject(project)
 
 	if err != nil {

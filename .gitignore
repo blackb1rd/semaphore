@@ -22,6 +22,7 @@ api/public/**/*
 /database.boltdb.lock
 /database_test.boltdb
 .DS_Store
+/backup.json
 node_modules/
 
 /.idea/
