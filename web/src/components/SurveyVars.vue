@@ -251,10 +251,16 @@ export default {
 
       // normalize default_value for select vs enum
       if (this.editedVar.type === 'select') {
-        if (this.editedVar.default_value == null) this.editedVar.default_value = [];
-        else if (!Array.isArray(this.editedVar.default_value)) this.editedVar.default_value = this.editedVar.default_value === '' ? [] : [this.editedVar.default_value];
-      } else {
-        if (Array.isArray(this.editedVar.default_value)) this.editedVar.default_value = this.editedVar.default_value.length > 0 ? this.editedVar.default_value[0] : '';
+        if (this.editedVar.default_value == null) {
+          this.editedVar.default_value = [];
+        } else if (!Array.isArray(this.editedVar.default_value)) {
+          const dv = this.editedVar.default_value;
+          this.editedVar.default_value = dv === '' ? [] : [dv];
+        }
+      } else if (Array.isArray(this.editedVar.default_value)) {
+        this.editedVar.default_value = this.editedVar.default_value.length > 0
+          ? this.editedVar.default_value[0]
+          : '';
       }
 
       this.editedVarIndex = index;
@@ -301,9 +307,14 @@ export default {
 
       // normalize default_value before saving: select keeps array, others use string
       if (this.editedVar.type === 'select') {
-        if (!Array.isArray(this.editedVar.default_value)) this.editedVar.default_value = this.editedVar.default_value == null || this.editedVar.default_value === '' ? [] : [this.editedVar.default_value];
-      } else {
-        if (Array.isArray(this.editedVar.default_value)) this.editedVar.default_value = this.editedVar.default_value.length > 0 ? this.editedVar.default_value[0] : '';
+        if (!Array.isArray(this.editedVar.default_value)) {
+          const dv = this.editedVar.default_value;
+          this.editedVar.default_value = dv == null || dv === '' ? [] : [dv];
+        }
+      } else if (Array.isArray(this.editedVar.default_value)) {
+        this.editedVar.default_value = this.editedVar.default_value.length > 0
+          ? this.editedVar.default_value[0]
+          : '';
       }
 
       if (this.editedVarIndex != null) {
@@ -324,8 +335,13 @@ export default {
 
     // remove one selected default item (for multiple select)
     removeDefaultItem(index) {
-      if (!this.editedVar || !Array.isArray(this.editedVar.default_value)) return;
-      if (index >= 0 && index < this.editedVar.default_value.length) this.editedVar.default_value.splice(index, 1);
+      if (!this.editedVar || !Array.isArray(this.editedVar.default_value)) {
+        return;
+      }
+
+      if (index >= 0 && index < this.editedVar.default_value.length) {
+        this.editedVar.default_value.splice(index, 1);
+      }
     },
 
     // label shown in selection chips - item could be the value or an object
