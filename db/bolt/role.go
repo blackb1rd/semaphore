@@ -4,7 +4,7 @@ import (
 	"github.com/semaphoreui/semaphore/db"
 )
 
-func (d *BoltDb) GetRole(roleID int) (role db.Role, err error) {
+func (d *BoltDb) GetGlobalRole(roleID int) (role db.Role, err error) {
 	err = d.getObject(0, db.RoleProps, intObjectID(roleID), &role)
 	return
 }
@@ -42,12 +42,27 @@ func (d *BoltDb) DeleteRole(roleID int) error {
 	return d.deleteObject(0, db.RoleProps, intObjectID(roleID), nil)
 }
 
-func (d *BoltDb) GetRoleBySlug(slug string) (db.Role, error) {
+func (d *BoltDb) GetProjectRole(projectID int, roleID int) (db.Role, error) {
+	var role db.Role
+	err := d.getObject(0, db.RoleProps, intObjectID(roleID), &role)
+	if err != nil {
+		return db.Role{}, err
+	}
+
+	// Verify the role belongs to the specified project
+	if role.ProjectID == nil || *role.ProjectID != projectID {
+		return db.Role{}, db.ErrNotFound
+	}
+
+	return role, nil
+}
+
+func (d *BoltDb) GetProjectOrGlobalRoleBySlug(projectID int, slug string) (db.Role, error) {
 	var roles []db.Role
 
 	err := d.getObjects(0, db.RoleProps, db.RetrieveQueryParams{}, func(i any) bool {
 		role := i.(db.Role)
-		return role.Slug == slug
+		return role.Slug == slug && role.ProjectID != nil && *role.ProjectID == projectID
 	}, &roles)
 
 	if err != nil {

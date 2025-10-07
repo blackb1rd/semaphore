@@ -409,7 +409,7 @@ func (d *SqlDb) GetTemplatePermission(projectID int, templateID int, userID int)
 
 	perm = projectUser.Role.GetPermissions()
 
-	role, err := d.GetRoleBySlug(string(projectUser.Role))
+	role, err := d.GetProjectOrGlobalRoleBySlug(projectUser.ProjectID, string(projectUser.Role))
 
 	if errors.Is(err, db.ErrNotFound) {
 		err = nil

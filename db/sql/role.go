@@ -2,7 +2,7 @@ package sql
 
 import "github.com/semaphoreui/semaphore/db"
 
-func (d *SqlDb) GetRole(roleID int) (db.Role, error) {
+func (d *SqlDb) GetGlobalRole(roleID int) (db.Role, error) {
 	var role db.Role
 	err := d.selectOne(&role, "select * from `role` where id=?", roleID)
 	return role, err
@@ -52,8 +52,14 @@ func (d *SqlDb) DeleteRole(roleID int) error {
 	return validateMutationResult(res, err)
 }
 
-func (d *SqlDb) GetRoleBySlug(slug string) (db.Role, error) {
+func (d *SqlDb) GetProjectRole(projectID int, roleID int) (db.Role, error) {
 	var role db.Role
-	err := d.selectOne(&role, "select * from `role` where slug=?", slug)
+	err := d.selectOne(&role, "select * from `role` where id=? and project_id=?", roleID, projectID)
+	return role, err
+}
+
+func (d *SqlDb) GetProjectOrGlobalRoleBySlug(projectID int, slug string) (db.Role, error) {
+	var role db.Role
+	err := d.selectOne(&role, "select * from `role` where slug=? and project_id=?", slug, projectID)
 	return role, err
 }

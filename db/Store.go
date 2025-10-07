@@ -470,8 +470,9 @@ type SecretStorageRepository interface {
 }
 
 type RoleRepository interface {
-	GetRole(roleID int) (Role, error)
-	GetRoleBySlug(slug string) (Role, error)
+	GetGlobalRole(roleID int) (Role, error)
+	GetProjectRole(projectID int, roleID int) (Role, error)
+	GetProjectOrGlobalRoleBySlug(projectID int, slug string) (Role, error)
 	GetProjectRoles(projectID int) ([]Role, error)
 	GetGlobalRoles() ([]Role, error)
 	UpdateRole(role Role) error
