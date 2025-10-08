@@ -87,7 +87,7 @@ func initSyslog(conf *util.SyslogConfig) {
 func runService() {
 	store := createStore("root")
 
-	initSyslog(util.Config.Syslog)
+	initSyslog(util.Config.Log.Channels.Syslog)
 
 	state := proTasks.NewTaskStateStore()
 	terraformStore := proFactory.NewTerraformStore(store)

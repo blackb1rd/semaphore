@@ -157,9 +157,14 @@ type TaskLogType struct {
 	ResultLogger *lumberjack.Logger `json:"result_logger,omitempty" env:"SEMAPHORE_TASK_RESULT_LOGGER"`
 }
 
+type ConfigLogChannels struct {
+	Syslog *SyslogConfig `json:"syslog,omitempty"`
+}
+
 type ConfigLog struct {
-	Events *EventLogType `json:"events,omitempty"`
-	Tasks  *TaskLogType  `json:"tasks,omitempty"`
+	Events   *EventLogType      `json:"events,omitempty"`
+	Tasks    *TaskLogType       `json:"tasks,omitempty"`
+	Channels *ConfigLogChannels `json:"channels,omitempty"`
 }
 
 type SyslogConfig struct {
@@ -327,8 +332,6 @@ type ConfigType struct {
 	Debugging *DebuggingConfig `json:"debugging,omitempty"`
 
 	HA *HAConfig `json:"ha,omitempty"`
-
-	Syslog *SyslogConfig `json:"syslog,omitempty"`
 }
 
 func NewConfigType() *ConfigType {
