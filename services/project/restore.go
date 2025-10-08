@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/semaphoreui/semaphore/db"
+	"github.com/semaphoreui/semaphore/pkg/random"
 )
 
 func getEntryByName[T BackupEntry](name *string, items []T) *T {
@@ -53,6 +54,7 @@ func (e BackupRole) Verify(backup *BackupFormat) error {
 func (e BackupRole) Restore(store db.Store, b *BackupDB) error {
 	role := e.Role
 	role.ProjectID = &b.meta.ID
+	role.Slug = random.String(16)
 	newRole, err := store.CreateRole(role)
 	if err != nil {
 		return err
@@ -354,6 +356,37 @@ func (e BackupTemplate) Restore(store db.Store, b *BackupDB) error {
 			}
 		}
 	}
+
+	if e.Roles != nil {
+		for _, role := range e.Roles {
+			if role.IsGlobal {
+				r, err := store.GetGlobalRoleBySlug(role.Role)
+				if err != nil {
+					return fmt.Errorf("global role does not exist: %s", role.Role)
+				}
+
+				store.CreateTemplateRole(db.TemplateRolePerm{
+					TemplateID:  newTemplate.ID,
+					RoleSlug:    r.Slug,
+					ProjectID:   b.meta.ID,
+					Permissions: role.Permissions,
+				})
+
+				continue
+			}
+			if k := findEntityByName[db.Role](&role.Role, b.roles); k == nil {
+				return fmt.Errorf("roles[].role does not exist in roles[].name")
+			} else {
+				store.CreateTemplateRole(db.TemplateRolePerm{
+					TemplateID:  template.ID,
+					RoleSlug:    k.Slug,
+					ProjectID:   b.meta.ID,
+					Permissions: role.Permissions,
+				})
+			}
+		}
+	}
+
 	return nil
 }
 

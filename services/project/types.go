@@ -21,7 +21,9 @@ type BackupDB struct {
 	integrationExtractValues map[int][]db.IntegrationExtractValue
 
 	secretStorages []db.SecretStorage
+	globalRoles    []db.Role
 	roles          []db.Role
+	templateRoles  map[int][]db.TemplateRolePerm
 }
 
 type BackupFormat struct {
@@ -74,6 +76,12 @@ type BackupRepository struct {
 	SSHKey *string `backup:"ssh_key"`
 }
 
+type BackupTemplateRole struct {
+	Role        string                   `backup:"role"`
+	IsGlobal    bool                     `backup:"is_global"`
+	Permissions db.ProjectUserPermission `backup:"permissions"`
+}
+
 type BackupTemplate struct {
 	db.Template
 
@@ -87,6 +95,8 @@ type BackupTemplate struct {
 
 	// Deprecated: Left here for compatibility with old backups
 	VaultKey *string `json:"vault_key"`
+
+	Roles []BackupTemplateRole `backup:"roles"`
 }
 
 type BackupTemplateVault struct {

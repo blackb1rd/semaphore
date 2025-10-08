@@ -72,7 +72,7 @@
           <v-btn
             icon
             class="mr-1"
-            @click="askDeleteItem(item.id)"
+            @click="askDeleteItem(item.slug)"
           >
             <v-icon>mdi-delete</v-icon>
           </v-btn>
@@ -80,7 +80,7 @@
           <v-btn
             icon
             class="mr-1"
-            @click="editItem(item.id)"
+            @click="editItem(item.slug)"
           >
             <v-icon>mdi-pencil</v-icon>
           </v-btn>
@@ -115,6 +115,12 @@ export default {
   data() {
     return {
     };
+  },
+
+  computed: {
+    IDFieldName() {
+      return 'slug';
+    },
   },
 
   watch: {

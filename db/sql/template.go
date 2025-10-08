@@ -424,7 +424,7 @@ func (d *SqlDb) GetTemplatePermission(projectID int, templateID int, userID int)
 		From("project__template_role").
 		Where("project_id = ?", projectID).
 		Where("template_id = ?", templateID).
-		Where("role_id = ?", role.ID).
+		Where("role_slug = ?", role.Slug).
 		ToSql()
 
 	if err != nil {
@@ -466,10 +466,10 @@ func (d *SqlDb) GetTemplateRoles(projectID int, templateID int) (roles []db.Temp
 func (d *SqlDb) CreateTemplateRole(role db.TemplateRolePerm) (newRole db.TemplateRolePerm, err error) {
 	insertID, err := d.insert(
 		"id",
-		"insert into project__template_role (project_id, template_id, role_id, permissions) values (?, ?, ?, ?)",
+		"insert into project__template_role (project_id, template_id, role_slug, permissions) values (?, ?, ?, ?)",
 		role.ProjectID,
 		role.TemplateID,
-		role.RoleID,
+		role.RoleSlug,
 		role.Permissions)
 
 	if err != nil {
