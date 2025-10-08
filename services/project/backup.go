@@ -16,7 +16,7 @@ func findNameBySlug[T db.BackupSluggedEntity](slug string, items []T) (*string, 
 			return &name, nil
 		}
 	}
-	return nil, fmt.Errorf("item %d does not exist", slug)
+	return nil, fmt.Errorf("item %s does not exist", slug)
 }
 
 func findNameByID[T db.BackupEntity](ID int, items []T) (*string, error) {
