@@ -3,7 +3,16 @@ FROM --platform=$BUILDPLATFORM golang:1.24-bookworm as builder
 RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
-    build-essential curl nodejs npm git gcc zip unzip tar ca-certificates; \
+    build-essential \
+    curl \
+    nodejs \
+    npm \
+    git \
+    gcc \
+    zip \
+    unzip \
+    tar \
+    ca-certificates; \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /usr/local
@@ -60,10 +69,49 @@ ARG ANSIBLE_VENV_PATH=/opt/semaphore/apps/ansible/${ANSIBLE_VERSION}/venv
 RUN set -eux; \
     apt-get update; \
     apt-get install -y --no-install-recommends \
-    bash curl git gnupg mysql-client openssh-client python3 python3-venv python3-pip rsync sshpass tar tini tzdata unzip wget zip jq ca-certificates nodejs npm chromium; \
-    # install system deps required by Cypress (headed/running browsers)
-    apt-get install -y --no-install-recommends \
-    libgtk-3-0 libnotify4 libgconf-2-4 libnss3 libxss1 libasound2 xvfb fonts-liberation libatk-bridge2.0-0 libatk1.0-0 libcups2 libx11-xcb1 libxcomposite1 libxcursor1 libxdamage1 libxi6 libxrandr2 libxtst6 libpangocairo-1.0-0 libpango-1.0-0 libdbus-1-3; \
+    bash \
+    curl \
+    git \
+    gnupg \
+    default-mysql-client \
+    openssh-client \
+    python3 \
+    python3-venv \
+    python3-pip \
+    rsync \
+    sshpass \
+    tar \
+    tini \
+    tzdata \
+    unzip \
+    wget \
+    zip \
+    jq \
+    ca-certificates \
+    nodejs \
+    npm \
+    chromium \
+    libgtk-3-0 \
+    libnotify4 \
+    libgconf-2-4 \
+    libnss3 \
+    libxss1 \
+    libasound2 \
+    xvfb \
+    fonts-liberation \
+    libatk-bridge2.0-0 \
+    libatk1.0-0 \
+    libcups2 \
+    libx11-xcb1 \
+    libxcomposite1 \
+    libxcursor1 \
+    libxdamage1 \
+    libxi6 \
+    libxrandr2 \
+    libxtst6 \
+    libpangocairo-1.0-0 \
+    libpango-1.0-0 \
+    libdbus-1-3; \
     rm -rf /var/lib/apt/lists/*; \
     groupadd -g 0 root || true; \
     useradd -u 1001 -g 0 -M -s /bin/sh semaphore || true; \
