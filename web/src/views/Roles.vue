@@ -42,7 +42,9 @@
       >{{ $t('newRole') }}</v-btn>
     </v-toolbar>
 
-    <v-divider />
+    <TeamMenu v-if="projectId" :project-id="projectId" :system-info="systemInfo" />
+
+    <v-divider style="margin-top: -1px;"/>
 
     <v-data-table
       :headers="headers"
@@ -70,7 +72,7 @@
           <v-btn
             icon
             class="mr-1"
-            @click="askDeleteItem(item.id)"
+            @click="askDeleteItem(item.slug)"
           >
             <v-icon>mdi-delete</v-icon>
           </v-btn>
@@ -78,7 +80,7 @@
           <v-btn
             icon
             class="mr-1"
-            @click="editItem(item.id)"
+            @click="editItem(item.slug)"
           >
             <v-icon>mdi-pencil</v-icon>
           </v-btn>
@@ -93,14 +95,18 @@ import YesNoDialog from '@/components/YesNoDialog.vue';
 import ItemListPageBase from '@/components/ItemListPageBase';
 import EditDialog from '@/components/EditDialog.vue';
 import RoleForm from '@/components/EditRoleForm.vue';
+import TeamMenu from '@/components/TeamMenu.vue';
 
 export default {
   mixins: [ItemListPageBase],
 
   props: {
+    projectId: Number,
+    systemInfo: Object,
   },
 
   components: {
+    TeamMenu,
     YesNoDialog,
     RoleForm,
     EditDialog,
@@ -109,6 +115,18 @@ export default {
   data() {
     return {
     };
+  },
+
+  computed: {
+    IDFieldName() {
+      return 'slug';
+    },
+  },
+
+  watch: {
+    async projectId() {
+      await this.loadItems();
+    },
   },
 
   methods: {
@@ -134,11 +152,11 @@ export default {
     },
 
     getItemsUrl() {
-      return '/api/roles';
+      return this.projectId ? `/api/project/${this.projectId}/roles` : '/api/roles';
     },
 
     getSingleItemUrl() {
-      return `/api/roles/${this.itemId}`;
+      return this.projectId ? `/api/project/${this.projectId}/roles/${this.itemId}` : `/api/roles/${this.itemId}`;
     },
 
     getEventName() {

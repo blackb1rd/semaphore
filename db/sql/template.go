@@ -204,15 +204,15 @@ func (d *SqlDb) getTemplates(projectID int, userID *int, filter db.TemplateFilte
 		"(SELECT `id` FROM `task` WHERE template_id = pt.id ORDER BY `id` DESC LIMIT 1) last_task_id",
 	}
 
-	if userID != nil {
-		fields = append(fields, "pr.permissions permissions")
-	}
+	//if userID != nil {
+	//	fields = append(fields, "pr.permissions permissions")
+	//}
 
 	q := squirrel.Select(fields...).From("project__template pt")
 
-	if userID != nil {
-		q = q.LeftJoin("project__template_role pr ON (pr.template_id = pt.id)")
-	}
+	//if userID != nil {
+	//	q = q.LeftJoin("project__template_role pr ON (pr.template_id = pt.id)")
+	//}
 
 	if filter.App != nil {
 		q = q.Where("pt.app=?", *filter.App)
@@ -409,7 +409,7 @@ func (d *SqlDb) GetTemplatePermission(projectID int, templateID int, userID int)
 
 	perm = projectUser.Role.GetPermissions()
 
-	role, err := d.GetRoleBySlug(string(projectUser.Role))
+	role, err := d.GetProjectOrGlobalRoleBySlug(projectUser.ProjectID, string(projectUser.Role))
 
 	if errors.Is(err, db.ErrNotFound) {
 		err = nil
@@ -424,7 +424,7 @@ func (d *SqlDb) GetTemplatePermission(projectID int, templateID int, userID int)
 		From("project__template_role").
 		Where("project_id = ?", projectID).
 		Where("template_id = ?", templateID).
-		Where("role_id = ?", role.ID).
+		Where("role_slug = ?", role.Slug).
 		ToSql()
 
 	if err != nil {
@@ -466,10 +466,10 @@ func (d *SqlDb) GetTemplateRoles(projectID int, templateID int) (roles []db.Temp
 func (d *SqlDb) CreateTemplateRole(role db.TemplateRolePerm) (newRole db.TemplateRolePerm, err error) {
 	insertID, err := d.insert(
 		"id",
-		"insert into project__template_role (project_id, template_id, role_id, permissions) values (?, ?, ?, ?)",
+		"insert into project__template_role (project_id, template_id, role_slug, permissions) values (?, ?, ?, ?)",
 		role.ProjectID,
 		role.TemplateID,
-		role.RoleID,
+		role.RoleSlug,
 		role.Permissions)
 
 	if err != nil {

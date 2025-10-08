@@ -46,7 +46,7 @@ func ProjectMiddleware(next http.Handler) http.Handler {
 
 		permissions := roleSlug.GetPermissions()
 
-		role, err := helpers.Store(r).GetRoleBySlug(string(projectUser.Role))
+		role, err := helpers.Store(r).GetProjectOrGlobalRoleBySlug(projectID, string(projectUser.Role))
 
 		if err == nil {
 			roleSlug = db.ProjectUserRole(role.Slug)

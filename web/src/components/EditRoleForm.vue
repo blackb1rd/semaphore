@@ -130,10 +130,16 @@ export default {
     },
 
     getItemsUrl() {
+      if (this.projectId) {
+        return `/api/project/${this.projectId}/roles`;
+      }
       return '/api/roles';
     },
 
     getSingleItemUrl() {
+      if (this.projectId) {
+        return `/api/project/${this.projectId}/roles/${this.itemId}`;
+      }
       return `/api/roles/${this.itemId}`;
     },
 
