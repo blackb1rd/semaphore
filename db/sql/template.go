@@ -204,15 +204,15 @@ func (d *SqlDb) getTemplates(projectID int, userID *int, filter db.TemplateFilte
 		"(SELECT `id` FROM `task` WHERE template_id = pt.id ORDER BY `id` DESC LIMIT 1) last_task_id",
 	}
 
-	if userID != nil {
-		fields = append(fields, "pr.permissions permissions")
-	}
+	//if userID != nil {
+	//	fields = append(fields, "pr.permissions permissions")
+	//}
 
 	q := squirrel.Select(fields...).From("project__template pt")
 
-	if userID != nil {
-		q = q.LeftJoin("project__template_role pr ON (pr.template_id = pt.id)")
-	}
+	//if userID != nil {
+	//	q = q.LeftJoin("project__template_role pr ON (pr.template_id = pt.id)")
+	//}
 
 	if filter.App != nil {
 		q = q.Where("pt.app=?", *filter.App)

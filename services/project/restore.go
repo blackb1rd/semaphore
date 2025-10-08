@@ -365,24 +365,31 @@ func (e BackupTemplate) Restore(store db.Store, b *BackupDB) error {
 					return fmt.Errorf("global role does not exist: %s", role.Role)
 				}
 
-				store.CreateTemplateRole(db.TemplateRolePerm{
+				_, err = store.CreateTemplateRole(db.TemplateRolePerm{
 					TemplateID:  newTemplate.ID,
 					RoleSlug:    r.Slug,
 					ProjectID:   b.meta.ID,
 					Permissions: role.Permissions,
 				})
 
+				if err != nil {
+					return err
+				}
+
 				continue
 			}
 			if k := findEntityByName[db.Role](&role.Role, b.roles); k == nil {
 				return fmt.Errorf("roles[].role does not exist in roles[].name")
 			} else {
-				store.CreateTemplateRole(db.TemplateRolePerm{
-					TemplateID:  template.ID,
+				_, err = store.CreateTemplateRole(db.TemplateRolePerm{
+					TemplateID:  newTemplate.ID,
 					RoleSlug:    k.Slug,
 					ProjectID:   b.meta.ID,
 					Permissions: role.Permissions,
 				})
+				if err != nil {
+					return err
+				}
 			}
 		}
 	}
