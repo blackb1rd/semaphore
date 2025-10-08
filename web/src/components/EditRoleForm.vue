@@ -131,7 +131,7 @@ export default {
 
     getItemsUrl() {
       if (this.projectId) {
-        return `/project/${this.projectId}/roles`;
+        return `/api/project/${this.projectId}/roles`;
       }
       return '/api/roles';
     },
