@@ -170,7 +170,7 @@ func (p *TaskPool) Run() {
 
 			db.StoreSession(p.store, "new task", func() {
 				//p.Queue = append(p.Queue, task)
-				msg := "Task " + strconv.Itoa(task.Task.ID) + " added to queue"
+				msg := "Task " + getTaskName(task) + " added to queue"
 				task.Log(msg)
 				log.Info(msg)
 				task.saveStatus()
@@ -182,6 +182,10 @@ func (p *TaskPool) Run() {
 
 		}
 	}
+}
+
+func getTaskName(t *TaskRunner) string {
+	return t.Template.Name + " " + strconv.Itoa(t.Task.ID)
 }
 
 func (p *TaskPool) handleQueue() {
@@ -208,7 +212,7 @@ func (p *TaskPool) handleQueue() {
 			if curr.Task.Status == task_logger.TaskFailStatus {
 				//delete failed TaskRunner from queue
 				_ = p.state.DequeueAt(i)
-				log.Info("Task " + strconv.Itoa(curr.Task.ID) + " removed from queue")
+				log.Info("Task " + getTaskName(curr) + " removed from queue")
 				continue
 			}
 
@@ -313,10 +317,10 @@ func (p *TaskPool) writeLogs(logs []logRecord) {
 }
 
 func runTask(task *TaskRunner, p *TaskPool) {
-	log.Info("Set resource locker with TaskRunner " + strconv.Itoa(task.Task.ID))
+	log.Info("Set resource locker with TaskRunner " + getTaskName(task))
 	p.onTaskRun(task)
 
-	log.Info("Task " + strconv.Itoa(task.Task.ID) + " started")
+	log.Info("Task " + getTaskName(task) + " started")
 	go func() {
 		time.Sleep(1 * time.Second)
 		task.run()
