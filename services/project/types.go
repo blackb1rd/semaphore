@@ -21,6 +21,7 @@ type BackupDB struct {
 	integrationExtractValues map[int][]db.IntegrationExtractValue
 
 	secretStorages []db.SecretStorage
+	roles          []db.Role
 }
 
 type BackupFormat struct {
@@ -35,6 +36,7 @@ type BackupFormat struct {
 	IntegrationAliases []string              `backup:"integration_aliases"`
 	Schedules          []BackupSchedule      `backup:"schedules"`
 	SecretStorages     []BackupSecretStorage `backup:"secret_storages"`
+	Roles              []BackupRole          `backup:"roles"`
 }
 
 type BackupMeta struct {
@@ -105,6 +107,10 @@ type BackupSecretStorage struct {
 	db.SecretStorage
 }
 
+type BackupRole struct {
+	db.Role
+}
+
 type BackupEntry interface {
 	GetName() string
 	Verify(backup *BackupFormat) error
@@ -136,5 +142,9 @@ func (e BackupTemplate) GetName() string {
 }
 
 func (e BackupSecretStorage) GetName() string {
+	return e.Name
+}
+
+func (e BackupRole) GetName() string {
 	return e.Name
 }

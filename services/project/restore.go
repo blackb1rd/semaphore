@@ -46,6 +46,21 @@ func (e BackupSecretStorage) Restore(store db.Store, b *BackupDB) error {
 	return nil
 }
 
+func (e BackupRole) Verify(backup *BackupFormat) error {
+	return verifyDuplicate[BackupRole](e.Name, backup.Roles)
+}
+
+func (e BackupRole) Restore(store db.Store, b *BackupDB) error {
+	role := e.Role
+	role.ProjectID = &b.meta.ID
+	newRole, err := store.CreateRole(role)
+	if err != nil {
+		return err
+	}
+	b.roles = append(b.roles, newRole)
+	return nil
+}
+
 func (e BackupEnvironment) Verify(backup *BackupFormat) error {
 	return verifyDuplicate[BackupEnvironment](e.Name, backup.Environments)
 }
@@ -439,6 +454,11 @@ func (backup *BackupFormat) Verify() error {
 			return fmt.Errorf("error at templates[%d]: %s", i, err.Error())
 		}
 	}
+	for i, o := range backup.Roles {
+		if err := o.Verify(backup); err != nil {
+			return fmt.Errorf("error at roles[%d]: %s", i, err.Error())
+		}
+	}
 
 	return nil
 }
@@ -476,6 +496,12 @@ func (backup *BackupFormat) Restore(user db.User, store db.Store) (*db.Project, 
 	for i, o := range backup.SecretStorages {
 		if err := o.Restore(store, &b); err != nil {
 			return nil, fmt.Errorf("error at secret storage[%d]: %s", i, err.Error())
+		}
+	}
+
+	for i, o := range backup.Roles {
+		if err := o.Restore(store, &b); err != nil {
+			return nil, fmt.Errorf("error at roles[%d]: %s", i, err.Error())
 		}
 	}
 

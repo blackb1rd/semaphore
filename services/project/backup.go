@@ -121,6 +121,12 @@ func (b *BackupDB) makeUniqueNames() {
 		item.Name = name
 	})
 
+	makeUniqueNames(b.roles, func(item *db.Role) string {
+		return item.Name
+	}, func(item *db.Role, name string) {
+		item.Name = name
+	})
+
 }
 
 func (b *BackupDB) load(projectID int, store db.Store) (err error) {
@@ -174,6 +180,11 @@ func (b *BackupDB) load(projectID int, store db.Store) (err error) {
 	}
 
 	b.secretStorages, err = store.GetSecretStorages(projectID)
+	if err != nil {
+		return
+	}
+
+	b.roles, err = store.GetProjectRoles(projectID)
 	if err != nil {
 		return
 	}
@@ -400,6 +411,13 @@ func (b *BackupDB) format() (*BackupFormat, error) {
 		integrationAliases = append(integrationAliases, alias.Alias)
 	}
 
+	roles := make([]BackupRole, len(b.roles))
+	for i, o := range b.roles {
+		roles[i] = BackupRole{
+			Role: o,
+		}
+	}
+
 	return &BackupFormat{
 		Meta: BackupMeta{
 			b.meta,
@@ -414,6 +432,7 @@ func (b *BackupDB) format() (*BackupFormat, error) {
 		IntegrationAliases: integrationAliases,
 		Schedules:          schedules,
 		SecretStorages:     secretStorages,
+		Roles:              roles,
 	}, nil
 }
 
