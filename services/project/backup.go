@@ -254,6 +254,13 @@ func (b *BackupDB) load(projectID int, store db.Store) (err error) {
 
 func (b *BackupDB) format() (*BackupFormat, error) {
 
+	roles := make([]BackupRole, len(b.roles))
+	for i, r := range b.roles {
+		roles[i] = BackupRole{
+			r,
+		}
+	}
+
 	schedules := make([]BackupSchedule, len(b.schedules))
 	for i, o := range b.schedules {
 
@@ -474,6 +481,7 @@ func (b *BackupDB) format() (*BackupFormat, error) {
 		IntegrationAliases: integrationAliases,
 		Schedules:          schedules,
 		SecretStorages:     secretStorages,
+		Roles:              roles,
 	}, nil
 }
 

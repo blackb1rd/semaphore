@@ -37,8 +37,11 @@ func (c *RolesController) DeleteRole(w http.ResponseWriter, r *http.Request) {
 }
 
 // Project-specific role methods
-
 func (c *RolesController) GetProjectRoles(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotFound)
+}
+
+func (c *RolesController) GetProjectAndGlobalRoles(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
 }
 

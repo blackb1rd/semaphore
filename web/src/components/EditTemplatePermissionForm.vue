@@ -130,7 +130,7 @@ export default {
   methods: {
     async loadRoles() {
       try {
-        const response = await axios.get(`/api/project/${this.projectId}/roles`);
+        const response = await axios.get(`/api/project/${this.projectId}/roles/all`);
         this.availableRoles = response.data;
       } catch (error) {
         this.formError = getErrorMessage(error);
