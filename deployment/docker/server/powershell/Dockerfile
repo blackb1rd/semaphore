@@ -21,7 +21,7 @@ RUN set -eux; \
     libssl3 \
     libstdc++6 \
     tzdata \
-    userspace-rcu \
+    liburcu6 \
     zlib1g \
     libicu-dev \
     curl \
