@@ -27,9 +27,6 @@
   </v-tabs>
 </template>
 
-<style lang="scss">
-
-</style>
 
 <script>
 export default {
