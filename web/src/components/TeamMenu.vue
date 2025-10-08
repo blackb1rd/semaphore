@@ -36,10 +36,5 @@ export default {
     systemInfo: Object,
   },
 
-  data() {
-    return {
-    };
-  },
-
 };
 </script>
