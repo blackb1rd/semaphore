@@ -81,7 +81,7 @@ func (d *BoltDb) GetProjectOrGlobalRoleBySlug(projectID int, slug string) (db.Ro
 
 	err := d.getObjects(0, db.RoleProps, db.RetrieveQueryParams{}, func(i any) bool {
 		role := i.(db.Role)
-		return role.Slug == slug && role.ProjectID != nil && *role.ProjectID == projectID
+		return role.Slug == slug
 	}, &roles)
 
 	if err != nil {
