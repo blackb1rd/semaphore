@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM golang:1.24-bookworm⁠ as builder
+FROM --platform=$BUILDPLATFORM golang:1.24-bookworm as builder
 
 RUN set -eux; \
     apt-get update; \
