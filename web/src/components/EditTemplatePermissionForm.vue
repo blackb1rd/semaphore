@@ -13,9 +13,9 @@
     </v-alert>
 
     <v-select
-      v-model="item.role_id"
+      v-model="item.role_slug"
       :items="availableRoles"
-      item-value="id"
+      item-value="slug"
       item-text="name"
       :label="$t('role')"
       :rules="[v => !!v || $t('role_required')]"
@@ -130,7 +130,7 @@ export default {
   methods: {
     async loadRoles() {
       try {
-        const response = await axios.get('/api/roles');
+        const response = await axios.get(`/api/project/${this.projectId}/roles/all`);
         this.availableRoles = response.data;
       } catch (error) {
         this.formError = getErrorMessage(error);
@@ -147,7 +147,7 @@ export default {
 
     getNewItem() {
       return {
-        role_id: null,
+        role_slug: null,
         template_id: parseInt(this.templateId, 10),
         project_id: this.projectId,
         permissions: 0,

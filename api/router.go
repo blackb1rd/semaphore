@@ -233,9 +233,9 @@ func Route(
 	globalRunnersAPI.Path("/{runner_id}/cache").HandlerFunc(clearGlobalRunnerCache).Methods("DELETE")
 
 	rolesAPI := adminAPI.PathPrefix("/roles").Subrouter()
-	rolesAPI.Path("/{role_id}").HandlerFunc(rolesController.GetRole).Methods("GET", "HEAD")
-	rolesAPI.Path("/{role_id}").HandlerFunc(rolesController.UpdateRole).Methods("PUT", "POST")
-	rolesAPI.Path("/{role_id}").HandlerFunc(rolesController.DeleteRole).Methods("DELETE")
+	rolesAPI.Path("/{role_slug}").HandlerFunc(rolesController.GetGlobalRole).Methods("GET", "HEAD")
+	rolesAPI.Path("/{role_slug}").HandlerFunc(rolesController.UpdateRole).Methods("PUT", "POST")
+	rolesAPI.Path("/{role_slug}").HandlerFunc(rolesController.DeleteRole).Methods("DELETE")
 
 	appsAPI := adminAPI.PathPrefix("/apps").Subrouter()
 	appsAPI.Use(appMiddleware)
@@ -342,6 +342,15 @@ func Route(
 	projectRunnersAPI.Path("/{runner_id}/active").HandlerFunc(projectRunnerController.SetRunnerActive).Methods("POST")
 	projectRunnersAPI.Path("/{runner_id}").HandlerFunc(projectRunnerController.DeleteRunner).Methods("DELETE")
 	projectRunnersAPI.Path("/{runner_id}/cache").HandlerFunc(projectRunnerController.ClearRunnerCache).Methods("DELETE")
+
+	projectUserAPI.Path("/roles").HandlerFunc(rolesController.GetProjectRoles).Methods("GET", "HEAD")
+	projectUserAPI.Path("/roles/all").HandlerFunc(rolesController.GetProjectAndGlobalRoles).Methods("GET", "HEAD")
+	projectUserAPI.Path("/roles").HandlerFunc(rolesController.AddProjectRole).Methods("POST")
+
+	projectRolesAPI := projectUserAPI.PathPrefix("/roles").Subrouter()
+	projectRolesAPI.Path("/{role_slug}").HandlerFunc(rolesController.GetProjectRole).Methods("GET", "HEAD")
+	projectRolesAPI.Path("/{role_slug}").HandlerFunc(rolesController.UpdateProjectRole).Methods("PUT", "POST")
+	projectRolesAPI.Path("/{role_slug}").HandlerFunc(rolesController.DeleteProjectRole).Methods("DELETE")
 
 	//
 	// Updating and deleting project
@@ -670,7 +679,7 @@ func getSystemInfo(w http.ResponseWriter, r *http.Request) {
 		timezone = "UTC"
 	}
 
-	roles, err := helpers.Store(r).GetRoles()
+	roles, err := helpers.Store(r).GetGlobalRoles()
 	if err != nil {
 		log.WithError(err).Error("Failed to get roles")
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)

@@ -30,7 +30,7 @@
       :items-per-page="Number.MAX_VALUE"
     >
       <template v-slot:item.role="{ item }">
-        {{ getRoleName(item.role_id) }}
+        {{ getRoleName(item.role_slug) }}
       </template>
 
       <template v-slot:item.permissions="{ item }">
@@ -137,7 +137,7 @@ export default {
   methods: {
     async loadRoles() {
       try {
-        const response = await axios.get('/api/roles');
+        const response = await axios.get(`/api/project/${this.template.project_id}/roles?mode=merge`);
         this.availableRoles = response.data;
       } catch (error) {
         // eslint-disable-next-line no-console
