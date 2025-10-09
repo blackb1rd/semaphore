@@ -95,7 +95,6 @@ RUN set -eux; \
     netcat-openbsd \
     libgtk-3-0 \
     libnotify4 \
-    gconf2 \
     libnss3 \
     libxss1 \
     libasound2 \
