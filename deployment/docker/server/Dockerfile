@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM golang:1.24-bookworm AS builder
+FROM --platform=$BUILDPLATFORM golang:1.24-trixie AS builder
 
 RUN set -eux; \
     apt-get update; \
@@ -58,7 +58,7 @@ RUN curl -O https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraf
 RUN wget -O /tmp/terragrunt https://github.com/gruntwork-io/terragrunt/releases/download/v${TERRAGRUNT_VERSION}/terragrunt_linux_${TARGETARCH} && \
     chmod +x /tmp/terragrunt
 
-FROM debian:bookworm
+FROM debian:trixie
 
 ARG TARGETARCH="amd64"
 # renovate: datasource=pypi depName=ansible
