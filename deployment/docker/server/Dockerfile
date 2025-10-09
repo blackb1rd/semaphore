@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM golang:1.24-bookworm as builder
+FROM --platform=$BUILDPLATFORM golang:1.24-bookworm AS builder
 
 RUN set -eux; \
     apt-get update; \
@@ -91,6 +91,7 @@ RUN set -eux; \
     nodejs \
     npm \
     chromium \
+    nmap \
     libgtk-3-0 \
     libnotify4 \
     libgconf-2-4 \
