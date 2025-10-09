@@ -146,7 +146,6 @@ RUN set -eux; \
     ansible-galaxy collection install community.docker; \
     ansible-galaxy collection install community.general; \
     ansible-galaxy collection install amazon.aws; \
-    apt-get remove -y --purge python3-dev build-essential libssl-dev libffi-dev cargo; \
     rm -rf /var/lib/apt/lists/*; \
     find ${ANSIBLE_VENV_PATH} -iname __pycache__ | xargs -r rm -rf; \
     chown -R semaphore:0 /opt/semaphore
