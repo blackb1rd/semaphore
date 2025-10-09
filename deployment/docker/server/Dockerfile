@@ -91,7 +91,8 @@ RUN set -eux; \
     nodejs \
     npm \
     chromium \
-    nmap \
+    ncat \
+    netcat-openbsd \
     libgtk-3-0 \
     libnotify4 \
     libgconf-2-4 \
