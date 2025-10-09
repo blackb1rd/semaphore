@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup qemu
         id: qemu
@@ -43,7 +43,7 @@ jobs:
             latest=true
 
       - name: Server build
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           builder: ${{ steps.buildx.outputs.name }}
           context: .
@@ -54,7 +54,7 @@ jobs:
           tags: ${{ steps.server.outputs.tags }}
 
       - name: Server build with Ansible 2.16.5
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           builder: ${{ steps.buildx.outputs.name }}
           context: .
@@ -66,20 +66,20 @@ jobs:
           labels: ${{ steps.server.outputs.labels }}
           tags: s4m3l0/semaphore:${{ github.ref_name }}-ansible2.16.5
 
-      - name: Server build with PowerShell 7.5.0
-        uses: docker/build-push-action@v5
-        with:
-          builder: ${{ steps.buildx.outputs.name }}
-          context: .
-          build-args: |
-            POWERSHELL_VERSION=7.5.0
-            SEMAPHORE_IMAGE=s4m3l0/semaphore
-            SEMAPHORE_VERSION=${{ github.ref_name }}
-          file: deployment/docker/server/powershell/Dockerfile
-          platforms: linux/amd64
-          push: ${{ github.event_name != 'pull_request' }}
-          labels: ${{ steps.server.outputs.labels }}
-          tags: s4m3l0/semaphore:${{ github.ref_name }}-powershell7.5.0
+      # - name: Server build with PowerShell 7.5.0
+      #   uses: docker/build-push-action@v6
+      #   with:
+      #     builder: ${{ steps.buildx.outputs.name }}
+      #     context: .
+      #     build-args: |
+      #       POWERSHELL_VERSION=7.5.0
+      #       SEMAPHORE_IMAGE=s4m3l0/semaphore
+      #       SEMAPHORE_VERSION=${{ github.ref_name }}
+      #     file: deployment/docker/server/powershell/Dockerfile
+      #     platforms: linux/amd64
+      #     push: ${{ github.event_name != 'pull_request' }}
+      #     labels: ${{ steps.server.outputs.labels }}
+      #     tags: s4m3l0/semaphore:${{ github.ref_name }}-powershell7.5.0
 
       - name: Runner meta
         id: runner
@@ -96,7 +96,7 @@ jobs:
             latest=true
 
       - name: Runner build
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           builder: ${{ steps.buildx.outputs.name }}
           context: .
@@ -107,7 +107,7 @@ jobs:
           tags: ${{ steps.runner.outputs.tags }}
 
       - name: Runner build with Ansible 2.16.5
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           builder: ${{ steps.buildx.outputs.name }}
           context: .
@@ -119,17 +119,17 @@ jobs:
           labels: ${{ steps.runner.outputs.labels }}
           tags: s4m3l0/runner:${{ github.ref_name }}-ansible2.16.5
 
-      - name: Runner build with PowerShell 7.5.0
-        uses: docker/build-push-action@v5
-        with:
-          builder: ${{ steps.buildx.outputs.name }}
-          context: .
-          build-args: |
-            POWERSHELL_VERSION=7.5.0
-            SEMAPHORE_IMAGE=s4m3l0/runner
-            SEMAPHORE_VERSION=${{ github.ref_name }}
-          file: deployment/docker/server/powershell/Dockerfile
-          platforms: linux/amd64
-          push: ${{ github.event_name != 'pull_request' }}
-          labels: ${{ steps.runner.outputs.labels }}
-          tags: s4m3l0/runner:${{ github.ref_name }}-powershell7.5.0
+    # - name: Runner build with PowerShell 7.5.0
+    #   uses: docker/build-push-action@v6
+    #   with:
+    #     builder: ${{ steps.buildx.outputs.name }}
+    #     context: .
+    #     build-args: |
+    #       POWERSHELL_VERSION=7.5.0
+    #       SEMAPHORE_IMAGE=s4m3l0/runner
+    #       SEMAPHORE_VERSION=${{ github.ref_name }}
+    #     file: deployment/docker/server/powershell/Dockerfile
+    #     platforms: linux/amd64
+    #     push: ${{ github.event_name != 'pull_request' }}
+    #     labels: ${{ steps.runner.outputs.labels }}
+    #     tags: s4m3l0/runner:${{ github.ref_name }}-powershell7.5.0
