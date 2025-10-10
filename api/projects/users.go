@@ -87,7 +87,7 @@ func AddUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !projectUser.Role.IsValid() {
-		_, err := helpers.Store(r).GetRoleBySlug(string(projectUser.Role))
+		_, err := helpers.Store(r).GetProjectOrGlobalRoleBySlug(project.ID, string(projectUser.Role))
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return
@@ -177,7 +177,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !projectUser.Role.IsValid() {
-		_, err := helpers.Store(r).GetRoleBySlug(string(projectUser.Role))
+		_, err := helpers.Store(r).GetProjectOrGlobalRoleBySlug(project.ID, string(projectUser.Role))
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return

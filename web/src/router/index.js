@@ -151,6 +151,10 @@ const routes = [
     component: Invites,
   },
   {
+    path: '/project/:projectId/roles',
+    component: Roles,
+  },
+  {
     path: '/auth/login',
     component: Auth,
   },

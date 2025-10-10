@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/semaphoreui/semaphore/db"
+	"github.com/semaphoreui/semaphore/pkg/random"
 )
 
 func getEntryByName[T BackupEntry](name *string, items []T) *T {
@@ -43,6 +44,22 @@ func (e BackupSecretStorage) Restore(store db.Store, b *BackupDB) error {
 		return err
 	}
 	b.secretStorages = append(b.secretStorages, newStorage)
+	return nil
+}
+
+func (e BackupRole) Verify(backup *BackupFormat) error {
+	return verifyDuplicate[BackupRole](e.Name, backup.Roles)
+}
+
+func (e BackupRole) Restore(store db.Store, b *BackupDB) error {
+	role := e.Role
+	role.ProjectID = &b.meta.ID
+	role.Slug = random.String(16)
+	newRole, err := store.CreateRole(role)
+	if err != nil {
+		return err
+	}
+	b.roles = append(b.roles, newRole)
 	return nil
 }
 
@@ -339,6 +356,44 @@ func (e BackupTemplate) Restore(store db.Store, b *BackupDB) error {
 			}
 		}
 	}
+
+	if e.Roles != nil {
+		for _, role := range e.Roles {
+			if role.IsGlobal {
+				r, err := store.GetGlobalRoleBySlug(role.Role)
+				if err != nil {
+					return fmt.Errorf("global role does not exist: %s", role.Role)
+				}
+
+				_, err = store.CreateTemplateRole(db.TemplateRolePerm{
+					TemplateID:  newTemplate.ID,
+					RoleSlug:    r.Slug,
+					ProjectID:   b.meta.ID,
+					Permissions: role.Permissions,
+				})
+
+				if err != nil {
+					return err
+				}
+
+				continue
+			}
+			if k := findEntityByName[db.Role](&role.Role, b.roles); k == nil {
+				return fmt.Errorf("roles[].role does not exist in roles[].name")
+			} else {
+				_, err = store.CreateTemplateRole(db.TemplateRolePerm{
+					TemplateID:  newTemplate.ID,
+					RoleSlug:    k.Slug,
+					ProjectID:   b.meta.ID,
+					Permissions: role.Permissions,
+				})
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+
 	return nil
 }
 
@@ -439,6 +494,11 @@ func (backup *BackupFormat) Verify() error {
 			return fmt.Errorf("error at templates[%d]: %s", i, err.Error())
 		}
 	}
+	for i, o := range backup.Roles {
+		if err := o.Verify(backup); err != nil {
+			return fmt.Errorf("error at roles[%d]: %s", i, err.Error())
+		}
+	}
 
 	return nil
 }
@@ -476,6 +536,12 @@ func (backup *BackupFormat) Restore(user db.User, store db.Store) (*db.Project, 
 	for i, o := range backup.SecretStorages {
 		if err := o.Restore(store, &b); err != nil {
 			return nil, fmt.Errorf("error at secret storage[%d]: %s", i, err.Error())
+		}
+	}
+
+	for i, o := range backup.Roles {
+		if err := o.Restore(store, &b); err != nil {
+			return nil, fmt.Errorf("error at roles[%d]: %s", i, err.Error())
 		}
 	}
 

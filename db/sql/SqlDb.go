@@ -771,7 +771,7 @@ func (d *SqlDb) CreateObject(props db.ObjectProps, object any) (newObject any, e
 		return
 	}
 
-	template, args := InsertTemplateFromType(newObject)
+	template, args := InsertTemplateFromType(object)
 	insertID, err := d.insert(
 		"id",
 		"insert into "+props.TableName+" "+template, args...)
