@@ -255,8 +255,8 @@ export default {
           if (surveyVar.type === 'select' && this.editedEnvironment[surveyVar.name] !== undefined) {
             const currentValue = this.editedEnvironment[surveyVar.name];
             if (!Array.isArray(currentValue)) {
-              this.editedEnvironment[surveyVar.name] =
-                currentValue == null || currentValue === '' ? [] : [currentValue];
+              this.editedEnvironment[surveyVar.name] = currentValue == null || currentValue === ''
+                ? [] : [currentValue];
             }
           }
         });
@@ -287,22 +287,22 @@ export default {
       [this.buildTasks, this.inventory] = await Promise.all([
         this.template.type === 'deploy'
           ? (
-              await axios({
-                keys: 'get',
-                url: `/api/project/${this.projectId}/templates/${this.template.build_template_id}/tasks?status=success&limit=20`,
-                responseType: 'json',
-              })
-            ).data.filter((task) => task.status === 'success')
+            await axios({
+              keys: 'get',
+              url: `/api/project/${this.projectId}/templates/${this.template.build_template_id}/tasks?status=success&limit=20`,
+              responseType: 'json',
+            })
+          ).data.filter((task) => task.status === 'success')
           : [],
 
         this.needInventory
           ? (
-              await axios({
-                keys: 'get',
-                url: this.getInventoryUrl(),
-                responseType: 'json',
-              })
-            ).data
+            await axios({
+              keys: 'get',
+              url: this.getInventoryUrl(),
+              responseType: 'json',
+            })
+          ).data
           : [],
       ]);
 
@@ -322,10 +322,7 @@ export default {
           {},
         );
 
-      this.editedEnvironment = {
-        ...defaultVars,
-        ...this.editedEnvironment,
-      };
+      this.editedEnvironment = { ...defaultVars, ...this.editedEnvironment };
 
       // Ensure select type variables without values are initialized as empty arrays
       (this.template.survey_vars || []).forEach((surveyVar) => {
