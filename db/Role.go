@@ -1,10 +1,10 @@
 package db
 
 type Role struct {
-	ID          int                   `db:"id" json:"id"`
-	Slug        string                `db:"slug" json:"slug"`
+	Slug        string                `db:"slug" json:"slug" backup:"-"`
 	Name        string                `db:"name" json:"name"`
 	Permissions ProjectUserPermission `db:"permissions" json:"permissions"`
+	ProjectID   *int                  `db:"project_id" json:"project_id"`
 }
 
 func ValidateRole(role Role) error {
@@ -16,7 +16,7 @@ func ValidateRole(role Role) error {
 
 type TemplateRolePerm struct {
 	ID          int                   `db:"id" json:"id"`
-	RoleID      int                   `db:"role_id" json:"role_id"`
+	RoleSlug    string                `db:"role_slug" json:"role_slug"`
 	TemplateID  int                   `db:"template_id" json:"template_id"`
 	ProjectID   int                   `db:"project_id" json:"project_id"`
 	Permissions ProjectUserPermission `db:"permissions" json:"permissions"`

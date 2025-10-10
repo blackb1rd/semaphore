@@ -26,6 +26,6 @@ func UserFromContext(r *http.Request) *db.User {
 	return GetFromContext(r, "user").(*db.User)
 }
 
-func GetRole(r *http.Request) db.Role {
+func GetGlobalRole(r *http.Request) db.Role {
 	return GetFromContext(r, "role").(db.Role)
 }

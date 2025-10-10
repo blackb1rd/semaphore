@@ -470,12 +470,14 @@ type SecretStorageRepository interface {
 }
 
 type RoleRepository interface {
-	GetRole(roleID int) (Role, error)
-	GetRoleBySlug(slug string) (Role, error)
-	GetRoles() ([]Role, error)
+	GetGlobalRoleBySlug(slug string) (Role, error)
+	GetProjectOrGlobalRoleBySlug(projectID int, slug string) (Role, error)
+	GetProjectRole(projectID int, slug string) (Role, error)
+	GetProjectRoles(projectID int) ([]Role, error)
+	GetGlobalRoles() ([]Role, error)
 	UpdateRole(role Role) error
 	CreateRole(role Role) (Role, error)
-	DeleteRole(role int) error
+	DeleteRole(slug string) error
 }
 
 // Store is the main interface that aggregates all specialized interfaces
@@ -628,7 +630,7 @@ var SecretStorageProps = ObjectProps{
 var RoleProps = ObjectProps{
 	TableName:         "role",
 	Type:              reflect.TypeOf(Role{}),
-	PrimaryColumnName: "id",
+	PrimaryColumnName: "slug",
 	IsGlobal:          true,
 	SortableColumns:   []string{"name"},
 }

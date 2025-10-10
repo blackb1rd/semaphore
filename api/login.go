@@ -203,7 +203,12 @@ func createSession(w http.ResponseWriter, r *http.Request, user db.User, oidc bo
 		"session": newSession.ID,
 	})
 	if err != nil {
-		panic(err)
+		log.WithError(err).WithFields(log.Fields{
+			"user_id": user.ID,
+			"context": "session",
+		}).Error("Failed to encode session cookie")
+		helpers.WriteErrorStatus(w, "Failed to create session", http.StatusInternalServerError)
+		return
 	}
 
 	http.SetCookie(w, &http.Cookie{
