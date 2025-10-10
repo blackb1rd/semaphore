@@ -104,7 +104,12 @@ func (c *IntegrationController) ReceiveIntegration(w http.ResponseWriter, r *htt
 		}
 
 		if integration.ProjectID != project.ID {
-			panic("")
+			log.WithFields(log.Fields{
+				"context":       "integrations",
+				"project_id":    project.ID,
+				"integrationId": integration.ID,
+			}).Error("integration project mismatch")
+			continue
 		}
 
 		err = c.integrationService.FillIntegration(&integration)
@@ -291,7 +296,7 @@ func GetTaskDefinition(integration db.Integration, payload []byte, r *http.Reque
 		}
 	}
 
-	// Add extracted environment variables only if they don't conflict with 
+	// Add extracted environment variables only if they don't conflict with
 	// existing task definition variables (task definition has higher priority)
 	for k, v := range extractedEnvResults {
 		if _, exists := env[k]; !exists {
