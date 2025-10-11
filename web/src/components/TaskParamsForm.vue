@@ -22,7 +22,9 @@
         :hint="v.description"
         v-model="editedEnvironment[v.name]"
         :required="v.required"
-        :rules="[(val) => !v.required || val != null || v.title + ' ' + $t('isRequired')]"
+        :rules="[
+          (val) => !v.required || val != null || v.title + ' ' + $t('isRequired'),
+        ]"
         :items="v.values"
         item-text="name"
         item-value="value"
@@ -32,8 +34,13 @@
         dense
       >
         <template v-slot:selection="{ item, index }">
-          <v-chip v-if="v.type === 'select'" small close @click:close="removeSelectedItem(v.name, index)"
-            >{{ item.name || item }}
+          <v-chip
+            v-if="v.type === 'select'"
+            small
+            close
+            @click:close="removeSelectedItem(v.name, index)"
+          >
+            {{ item.name || item }}
           </v-chip>
         </template>
       </v-select>
@@ -346,13 +353,15 @@ export default {
     },
 
     removeSelectedItem(varName, index) {
-      if (!Object.prototype.hasOwnProperty.call(this.editedEnvironment, varName) || !Array.isArray(this.editedEnvironment[varName])) {
+      const env = this.editedEnvironment;
+      if (!Object.prototype.hasOwnProperty.call(env, varName) || !Array.isArray(env[varName])) {
         // Optionally, log a warning for debugging:
         // console.warn(`removeSelectedItem: '${varName}' is not a valid array key in editedEnvironment.`);
         return;
       }
-      if (index < this.editedEnvironment[varName].length) {
-        this.editedEnvironment[varName].splice(index, 1);
+
+      if (index < env[varName].length) {
+        env[varName].splice(index, 1);
       }
     },
   },
