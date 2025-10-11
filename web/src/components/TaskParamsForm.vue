@@ -346,10 +346,12 @@ export default {
     },
 
     removeSelectedItem(varName, index) {
-      if (!this.editedEnvironment[varName] || !Array.isArray(this.editedEnvironment[varName])) {
+      if (!Object.prototype.hasOwnProperty.call(this.editedEnvironment, varName) || !Array.isArray(this.editedEnvironment[varName])) {
+        // Optionally, log a warning for debugging:
+        // console.warn(`removeSelectedItem: '${varName}' is not a valid array key in editedEnvironment.`);
         return;
       }
-      if (index >= 0 && index < this.editedEnvironment[varName].length) {
+      if (index < this.editedEnvironment[varName].length) {
         this.editedEnvironment[varName].splice(index, 1);
       }
     },
