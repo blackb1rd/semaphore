@@ -48,7 +48,7 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           context: .
           file: deployment/docker/server/Dockerfile
-          platforms: linux/amd64 # ,linux/arm/v6
+          platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           labels: ${{ steps.server.outputs.labels }}
           tags: ${{ steps.server.outputs.tags }}
@@ -61,7 +61,7 @@ jobs:
           build-args: |
             ANSIBLE_VERSION=9.4.0
           file: deployment/docker/server/Dockerfile
-          platforms: linux/amd64 # ,linux/arm/v6
+          platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           labels: ${{ steps.server.outputs.labels }}
           tags: s4m3l0/semaphore:${{ github.ref_name }}-ansible2.16.5
@@ -101,7 +101,7 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           context: .
           file: deployment/docker/runner/Dockerfile
-          platforms: linux/amd64 #,linux/arm/v6
+          platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           labels: ${{ steps.runner.outputs.labels }}
           tags: ${{ steps.runner.outputs.tags }}
@@ -114,7 +114,7 @@ jobs:
           build-args: |
             ANSIBLE_VERSION=9.4.0
           file: deployment/docker/runner/Dockerfile
-          platforms: linux/amd64 #,linux/arm/v6
+          platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           labels: ${{ steps.runner.outputs.labels }}
           tags: s4m3l0/runner:${{ github.ref_name }}-ansible2.16.5
