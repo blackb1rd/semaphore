@@ -302,7 +302,9 @@ export default {
     },
 
     deleteItem(name, index) {
-      this.editedEnvironment[name].splice(index, 1);
+      if (Array.isArray(this.editedEnvironment?.[name])) {
+        this.editedEnvironment[name].splice(index, 1);
+      }
     },
 
     getTaskMessage(task) {
