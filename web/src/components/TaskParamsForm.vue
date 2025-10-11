@@ -31,8 +31,8 @@
         outlined
         dense
       >
-        <template v-slot:selection="{ item, index }" v-if="v.type === 'select'">
-          <v-chip small close @click:close="removeSelectedItem(v.name, index)"
+        <template v-slot:selection="{ item, index }">
+          <v-chip v-if="v.type === 'select'" small close @click:close="removeSelectedItem(v.name, index)"
             >{{ item.name || item }}
           </v-chip>
         </template>
