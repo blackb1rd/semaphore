@@ -96,16 +96,14 @@
         :multiple="v.type === 'select'"
         :chips="v.type === 'select'"
       >
-      <template v-slot:selection="{ item, index }">
-        <div v-if="v.type === 'select'">
-          <v-chip
-            small
-            close
-            @click:close="deleteItem(v.name, index)"
-          >
-            {{ item.name }}
-          </v-chip>
-        </div>
+      <template v-if="v.type === 'select'" v-slot:selection="{ item, index }">
+        <v-chip
+          small
+          close
+          @click:close="deleteItem(v.name, index)"
+        >
+          {{ item.name }}
+        </v-chip>
       </template>
     </v-select>
 
