@@ -292,22 +292,22 @@ export default {
       [this.buildTasks, this.inventory] = await Promise.all([
         this.template.type === 'deploy'
           ? (
-              await axios({
-                keys: 'get',
-                url: `/api/project/${this.projectId}/templates/${this.template.build_template_id}/tasks?status=success&limit=20`,
-                responseType: 'json',
-              })
-            ).data.filter((task) => task.status === 'success')
+            await axios({
+              keys: 'get',
+              url: `/api/project/${this.projectId}/templates/${this.template.build_template_id}/tasks?status=success&limit=20`,
+              responseType: 'json',
+            })
+          ).data.filter((task) => task.status === 'success')
           : [],
 
         this.needInventory
           ? (
-              await axios({
-                keys: 'get',
-                url: this.getInventoryUrl(),
-                responseType: 'json',
-              })
-            ).data
+            await axios({
+              keys: 'get',
+              url: this.getInventoryUrl(),
+              responseType: 'json',
+            })
+          ).data
           : [],
       ]);
 
@@ -348,7 +348,6 @@ export default {
             const m = sv.values.find((it) => String(it.name) === String(d));
             return m ? m.value : d;
           });
-          return;
         }
       });
 
