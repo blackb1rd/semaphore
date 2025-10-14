@@ -260,8 +260,7 @@ export default {
           if (surveyVar.type === 'select' && this.editedEnvironment[surveyVar.name] !== undefined) {
             const currentValue = this.editedEnvironment[surveyVar.name];
             if (!Array.isArray(currentValue)) {
-              this.editedEnvironment[surveyVar.name] =
-                currentValue == null || currentValue === '' ? [] : [currentValue];
+              this.editedEnvironment[surveyVar.name] = currentValue == null || currentValue === '' ? [] : [currentValue];
             }
           }
         });

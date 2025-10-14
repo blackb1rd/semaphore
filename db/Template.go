@@ -61,7 +61,7 @@ func (t TemplateApp) IsTerraform() bool {
 type SurveyVarType string
 
 const (
-	SurveyVarStr    TemplateType = ""
+	SurveyVarStr    TemplateType = "str"
 	SurveyVarInt    TemplateType = "int"
 	SurveyVarEnum   TemplateType = "enum"
 	SurveyVarSelect TemplateType = "select"
