@@ -134,8 +134,8 @@ export default {
   data() {
     return {
       item: null,
-      editedEnvironment: {},
-      editedSecretEnvironment: {},
+      editedEnvironment: null,
+      editedSecretEnvironment: null,
       inventory: null,
     };
   },
@@ -185,7 +185,7 @@ export default {
   watch: {
     editedEnvironment: {
       handler(newVal, oldVal) {
-        if (!this.item || oldVal == null || oldVal === undefined) {
+        if (oldVal == null) {
           return;
         }
         this.item.environment = JSON.stringify(this.editedEnvironment);
@@ -197,7 +197,7 @@ export default {
 
     editedSecretEnvironment: {
       handler(newVal, oldVal) {
-        if (!this.item || oldVal == null || oldVal === undefined) {
+        if (oldVal == null) {
           return;
         }
         this.item.secret = JSON.stringify(this.editedSecretEnvironment);
@@ -335,60 +335,17 @@ export default {
         }
       });
 
-      // Build default vars; for enum/select try matching default by option.value
-      const defaultVars = {};
-      (this.template.survey_vars || []).forEach((sv) => {
-        const dv = sv.default_value;
+      const defaultVars = (this.template.survey_vars || [])
+        .filter((s) => s.default_value)
+        .reduce(
+          (res, curr) => ({
+            ...res,
+            [curr.name]: curr.default_value,
+          }),
+          {},
+        );
 
-        if (dv === undefined || dv === null || dv === '') {
-          return;
-        }
-
-        if (Array.isArray(sv.values) && sv.type === 'enum') {
-          const match = sv.values.find((it) => String(it.value) === String(dv));
-          if (match) {
-            defaultVars[sv.name] = match.value;
-          }
-          return;
-        }
-
-        if (Array.isArray(sv.values) && sv.type === 'select') {
-          // normalize to array
-          let arr = dv;
-          if (!Array.isArray(arr)) {
-            if (typeof arr === 'string') {
-              try {
-                const parsed = JSON.parse(arr);
-                arr = Array.isArray(parsed) ? parsed : [parsed];
-              } catch (e) {
-                arr = arr === '' ? [] : arr.split(',').map((s) => s.trim());
-              }
-            } else {
-              arr = [arr];
-            }
-          }
-
-          const mapped = arr.map((d) => {
-            const m = sv.values.find((it) => String(it.value) === String(d));
-            return m ? m.value : null;
-          }).filter((v) => v != null);
-
-          if (mapped.length > 0) {
-            defaultVars[sv.name] = mapped;
-          }
-          return;
-        }
-
-        // For other types (str, int, etc): use default value as-is
-        defaultVars[sv.name] = dv;
-      });
-
-      // Merge defaults into existing environment (preserves reactivity)
-      Object.keys(defaultVars).forEach((key) => {
-        if (this.editedEnvironment[key] === undefined) {
-          this.$set(this.editedEnvironment, key, defaultVars[key]);
-        }
-      });
+      this.editedEnvironment = { ...defaultVars, ...this.editedEnvironment };
 
       // Ensure select type variables without values are initialized as empty arrays
       (this.template.survey_vars || []).forEach((surveyVar) => {
