@@ -37,7 +37,7 @@
             close
             @click:close="removeSelectedItem(v.name, index)"
           >
-            {{ item.name || item }}
+            {{ item.name }}
           </v-chip>
         </template>
       </v-select>
