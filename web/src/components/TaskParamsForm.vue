@@ -134,8 +134,8 @@ export default {
   data() {
     return {
       item: null,
-      editedEnvironment: null,
-      editedSecretEnvironment: null,
+      editedEnvironment: {},
+      editedSecretEnvironment: {},
       inventory: null,
     };
   },
@@ -185,7 +185,7 @@ export default {
   watch: {
     editedEnvironment: {
       handler(newVal, oldVal) {
-        if (oldVal == null) {
+        if (!this.item || oldVal == null || oldVal === undefined) {
           return;
         }
         this.item.environment = JSON.stringify(this.editedEnvironment);
@@ -197,7 +197,7 @@ export default {
 
     editedSecretEnvironment: {
       handler(newVal, oldVal) {
-        if (oldVal == null) {
+        if (!this.item || oldVal == null || oldVal === undefined) {
           return;
         }
         this.item.secret = JSON.stringify(this.editedSecretEnvironment);
@@ -250,8 +250,24 @@ export default {
         this.item[field] = v[field];
       });
 
-      this.editedEnvironment = JSON.parse(v.environment || '{}');
-      this.editedSecretEnvironment = JSON.parse(v.secret || '{}');
+      const parsedEnv = JSON.parse(v.environment || '{}');
+      const parsedSecret = JSON.parse(v.secret || '{}');
+
+      // Clear and update editedEnvironment reactively
+      Object.keys(this.editedEnvironment).forEach((key) => {
+        this.$delete(this.editedEnvironment, key);
+      });
+      Object.keys(parsedEnv).forEach((key) => {
+        this.$set(this.editedEnvironment, key, parsedEnv[key]);
+      });
+
+      // Clear and update editedSecretEnvironment reactively
+      Object.keys(this.editedSecretEnvironment).forEach((key) => {
+        this.$delete(this.editedSecretEnvironment, key);
+      });
+      Object.keys(parsedSecret).forEach((key) => {
+        this.$set(this.editedSecretEnvironment, key, parsedSecret[key]);
+      });
 
       // Normalize select type variables to ensure they are arrays
       if (this.template && this.template.survey_vars) {
@@ -259,7 +275,11 @@ export default {
           if (surveyVar.type === 'select' && this.editedEnvironment[surveyVar.name] !== undefined) {
             const currentValue = this.editedEnvironment[surveyVar.name];
             if (!Array.isArray(currentValue)) {
-              this.editedEnvironment[surveyVar.name] = currentValue == null || currentValue === '' ? [] : [currentValue];
+              this.$set(
+                this.editedEnvironment,
+                surveyVar.name,
+                currentValue == null || currentValue === '' ? [] : [currentValue],
+              );
             }
           }
         });
