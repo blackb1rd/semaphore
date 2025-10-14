@@ -61,10 +61,10 @@ func (t TemplateApp) IsTerraform() bool {
 type SurveyVarType string
 
 const (
-	SurveyVarStr    TemplateType = "str"
-	SurveyVarInt    TemplateType = "int"
-	SurveyVarEnum   TemplateType = "enum"
-	SurveyVarSelect TemplateType = "select"
+	SurveyVarStr    SurveyVarType = "str"
+	SurveyVarInt    SurveyVarType = "int"
+	SurveyVarEnum   SurveyVarType = "enum"
+	SurveyVarSelect SurveyVarType = "select"
 )
 
 // SurveyVarDefaultValue supports both a single string or an array of strings in JSON.
@@ -146,7 +146,7 @@ type SurveyVar struct {
 	Name         string                 `json:"name" backup:"name"`
 	Title        string                 `json:"title" backup:"title"`
 	Required     bool                   `json:"required,omitempty" backup:"required"`
-	Type         SurveyVarType          `json:"type,omitempty" backup:"type"`
+	Type         SurveyVarType          `json:"type" backup:"type"`
 	Description  string                 `json:"description,omitempty" backup:"description"`
 	Values       []SurveyVarEnumValue   `json:"values,omitempty" backup:"values"`
 	DefaultValue *SurveyVarDefaultValue `json:"default_value,omitempty" backup:"default_value"`
