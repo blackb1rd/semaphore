@@ -22,9 +22,7 @@
         :hint="v.description"
         v-model="editedEnvironment[v.name]"
         :required="v.required"
-        :rules="[
-          (val) => !v.required || val != null || v.title + ' ' + $t('isRequired'),
-        ]"
+        :rules="[(val) => !v.required || val != null || v.title + ' ' + $t('isRequired')]"
         :items="v.values"
         item-text="name"
         item-value="value"
@@ -262,8 +260,8 @@ export default {
           if (surveyVar.type === 'select' && this.editedEnvironment[surveyVar.name] !== undefined) {
             const currentValue = this.editedEnvironment[surveyVar.name];
             if (!Array.isArray(currentValue)) {
-              this.editedEnvironment[surveyVar.name] = currentValue == null || currentValue === ''
-                ? [] : [currentValue];
+              this.editedEnvironment[surveyVar.name] =
+                currentValue == null || currentValue === '' ? [] : [currentValue];
             }
           }
         });
@@ -294,22 +292,22 @@ export default {
       [this.buildTasks, this.inventory] = await Promise.all([
         this.template.type === 'deploy'
           ? (
-            await axios({
-              keys: 'get',
-              url: `/api/project/${this.projectId}/templates/${this.template.build_template_id}/tasks?status=success&limit=20`,
-              responseType: 'json',
-            })
-          ).data.filter((task) => task.status === 'success')
+              await axios({
+                keys: 'get',
+                url: `/api/project/${this.projectId}/templates/${this.template.build_template_id}/tasks?status=success&limit=20`,
+                responseType: 'json',
+              })
+            ).data.filter((task) => task.status === 'success')
           : [],
 
         this.needInventory
           ? (
-            await axios({
-              keys: 'get',
-              url: this.getInventoryUrl(),
-              responseType: 'json',
-            })
-          ).data
+              await axios({
+                keys: 'get',
+                url: this.getInventoryUrl(),
+                responseType: 'json',
+              })
+            ).data
           : [],
       ]);
 
@@ -319,15 +317,40 @@ export default {
         }
       });
 
-      const defaultVars = (this.template.survey_vars || [])
-        .filter((s) => s.default_value)
-        .reduce(
-          (res, curr) => ({
-            ...res,
-            [curr.name]: curr.default_value,
-          }),
-          {},
-        );
+      // Build default vars; for enum/select try matching default by option.name
+      const defaultVars = {};
+      (this.template.survey_vars || []).forEach((sv) => {
+        const dv = sv.default_value;
+
+        if (Array.isArray(sv.values) && sv.type === 'enum') {
+          const match = sv.values.find((it) => String(it.name) === String(dv));
+          defaultVars[sv.name] = match ? match.value : dv;
+          return;
+        }
+
+        if (Array.isArray(sv.values) && sv.type === 'select') {
+          // normalize to array
+          let arr = dv;
+          if (!Array.isArray(arr)) {
+            if (typeof arr === 'string') {
+              try {
+                const parsed = JSON.parse(arr);
+                arr = Array.isArray(parsed) ? parsed : [parsed];
+              } catch (e) {
+                arr = arr === '' ? [] : arr.split(',').map((s) => s.trim());
+              }
+            } else {
+              arr = [arr];
+            }
+          }
+
+          defaultVars[sv.name] = arr.map((d) => {
+            const m = sv.values.find((it) => String(it.name) === String(d));
+            return m ? m.value : d;
+          });
+          return;
+        }
+      });
 
       this.editedEnvironment = { ...defaultVars, ...this.editedEnvironment };
 
