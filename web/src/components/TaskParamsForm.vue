@@ -321,9 +321,15 @@ export default {
       (this.template.survey_vars || []).forEach((sv) => {
         const dv = sv.default_value;
 
+        if (dv === undefined || dv === null || dv === '') {
+          return;
+        }
+
         if (Array.isArray(sv.values) && sv.type === 'enum') {
           const match = sv.values.find((it) => String(it.value) === String(dv));
-          defaultVars[sv.name] = match ? match.value : dv;
+          if (match) {
+            defaultVars[sv.name] = match.value;
+          }
           return;
         }
 
@@ -343,14 +349,27 @@ export default {
             }
           }
 
-          defaultVars[sv.name] = arr.map((d) => {
+          const mapped = arr.map((d) => {
             const m = sv.values.find((it) => String(it.value) === String(d));
-            return m ? m.value : d;
-          });
+            return m ? m.value : null;
+          }).filter((v) => v != null);
+
+          if (mapped.length > 0) {
+            defaultVars[sv.name] = mapped;
+          }
+          return;
         }
+
+        // For other types (str, int, etc): use default value as-is
+        defaultVars[sv.name] = dv;
       });
 
-      this.editedEnvironment = { ...defaultVars, ...this.editedEnvironment };
+      // Merge defaults into existing environment (preserves reactivity)
+      Object.keys(defaultVars).forEach((key) => {
+        if (this.editedEnvironment[key] === undefined) {
+          this.$set(this.editedEnvironment, key, defaultVars[key]);
+        }
+      });
 
       // Ensure select type variables without values are initialized as empty arrays
       (this.template.survey_vars || []).forEach((surveyVar) => {
