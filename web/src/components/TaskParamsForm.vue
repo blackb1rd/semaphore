@@ -351,9 +351,6 @@ export default {
     removeSelectedItem(varName, index) {
       const env = this.editedEnvironment;
       if (!Object.prototype.hasOwnProperty.call(env, varName) || !Array.isArray(env[varName])) {
-        // Optionally, log a warning for debugging:
-        // console.warn(`removeSelectedItem: '${varName}' is not
-        // a valid array key in editedEnvironment.`);
         return;
       }
 
