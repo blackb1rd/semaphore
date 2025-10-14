@@ -316,13 +316,13 @@ export default {
         }
       });
 
-      // Build default vars; for enum/select try matching default by option.name
+      // Build default vars; for enum/select try matching default by option.value
       const defaultVars = {};
       (this.template.survey_vars || []).forEach((sv) => {
         const dv = sv.default_value;
 
         if (Array.isArray(sv.values) && sv.type === 'enum') {
-          const match = sv.values.find((it) => String(it.name) === String(dv));
+          const match = sv.values.find((it) => String(it.value) === String(dv));
           defaultVars[sv.name] = match ? match.value : dv;
           return;
         }
@@ -344,7 +344,7 @@ export default {
           }
 
           defaultVars[sv.name] = arr.map((d) => {
-            const m = sv.values.find((it) => String(it.name) === String(d));
+            const m = sv.values.find((it) => String(it.value) === String(d));
             return m ? m.value : d;
           });
         }
